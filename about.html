@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>little things — about the project</title>
+
+  <!-- The site's font (Fragment Mono, from Google Fonts) - loaded once
+       here per page; see --font-main in style.css for where it's applied. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <!-- Shares the homepage's stylesheet (font, logo sizing/position
+       variables) - see about.css for everything specific to this page. -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="about.css">
+</head>
+<body>
+
+  <!-- Upper-right logo, same asset/size/position system as the homepage -
+       see #about-logo/#about-logo-link in about.css, which reuse
+       style.css's --logo-margin/--logo-width. Clicking it returns to the
+       homepage (there's nothing to "reload" on this page, so a plain
+       link to index.html is this page's equivalent of the homepage
+       logo's restart behaviour). -->
+  <a id="about-logo-link" href="index.html" aria-label="little things here now - back to homepage">
+    <img id="about-logo" src="assets/images/little-things-logo.png" alt="little things here now" draggable="false">
+  </a>
+
+  <!-- Upper-left navigation: heading, the same paper fortune teller
+       image used on the homepage, and the four section tabs. A
+       standard accessible tabs pattern - see about.js for the
+       switching logic. -->
+  <div id="about-nav">
+    <!-- Both the heading and the fortune teller image return to the
+         homepage already in its finished "jar open" state (all four
+         navigation objects out and settled) instead of replaying the
+         pigeon/feather/wrestler sequence - see the "state=open-jar"
+         handling in script.js. One shared link wraps both, since they
+         lead to the exact same place. -->
+    <a id="about-jar-link" href="index.html?state=open-jar" aria-label="back to little things here now, jar already open">
+      <h1 id="about-heading"><span class="about-title-line about-title-line-one">about the</span> <span class="about-title-line about-title-line-two">project</span></h1>
+
+      <img id="about-fortune-teller" src="assets/images/about-paper-fortune-teller.png" alt="" draggable="false">
+    </a>
+
+    <div id="about-tabs" role="tablist" aria-label="About sections">
+      <button type="button" class="about-tab" role="tab" id="tab-film" aria-selected="true" aria-controls="panel-film">a short film</button>
+      <button type="button" class="about-tab" role="tab" id="tab-what" aria-selected="false" aria-controls="panel-what">what is this?</button>
+      <button type="button" class="about-tab" role="tab" id="tab-why" aria-selected="false" aria-controls="panel-why">why now?</button>
+      <button type="button" class="about-tab" role="tab" id="tab-did" aria-selected="false" aria-controls="panel-did">what did i do?</button>
+    </div>
+  </div>
+
+  <!-- The four content panels. Only "panel-film" has anything in it yet -
+       the other three are intentionally empty until their content is
+       written. "hidden" keeps them out of the accessibility tree and
+       out of layout entirely; about.js toggles it when a tab is
+       clicked. -->
+  <main id="about-content">
+    <section id="panel-film" class="about-panel" role="tabpanel" aria-labelledby="tab-film">
+      <video id="about-film" src="assets/video/about-short-film.mp4" controls playsinline preload="metadata"></video>
+    </section>
+
+    <section id="panel-what" class="about-panel" role="tabpanel" aria-labelledby="tab-what" hidden>
+      <p class="what-is-this-intro what-copy">
+        <span class="inline-project-name">little_things_here_now</span>
+        is an ongoing collection of ordinary moments that briefly interrupt the way we move through everyday&nbsp;life.
+      </p>
+
+      <p class="what-is-this-body what-copy">
+        Sometimes the ordinary world seems to perform without being asked: a curtain escapes through a window, a chicken waves from a parked car, and an improvised gate finds its own peculiar shape. These small encounters are easy to miss, but once noticed, they can make an ordinary place feel briefly strange, funny, or unexpectedly alive.
+      </p>
+
+      <div class="what-is-this-images">
+        <img id="what-is-this-curtain" src="assets/images/about/what-is-this-curtain.png" alt="" draggable="false">
+        <img id="what-is-this-chicken" src="assets/images/about/what-is-this-chicken.png" alt="" draggable="false">
+        <img id="what-is-this-gate" src="assets/images/about/what-is-this-gate.png" alt="" draggable="false">
+      </div>
+
+      <!-- iPhone portrait only (hidden elsewhere, including desktop -
+           see .mobile-about-gallery in about.css): a native horizontal
+           swipe gallery, gate/curtain/chicken, replacing the desktop
+           three-image row above rather than resizing it. The curtain
+           slide ("is-initial") is scrolled to centre once this panel
+           first becomes visible - see about.js. -->
+      <div class="mobile-about-gallery">
+        <img class="mobile-about-slide" src="assets/images/about/what-is-this-gate.png" alt="" draggable="false">
+        <img class="mobile-about-slide is-initial" src="assets/images/about/what-is-this-curtain.png" alt="" draggable="false">
+        <img class="mobile-about-slide" src="assets/images/about/what-is-this-chicken.png" alt="" draggable="false">
+      </div>
+
+      <p class="what-is-this-outro what-copy">
+        The project collects these encounters and transforms some of them into images, films, small interventions and invitations to participate. This website is both a container for those things and a small intervention of its&nbsp;own.
+      </p>
+    </section>
+
+    <section id="panel-why" class="about-panel" role="tabpanel" aria-labelledby="tab-why" hidden>
+      <p class="why-now-copy">why do we need a stronger sense of now, now?</p>
+
+      <p class="why-now-copy">this project began in switzerland, where everyday life often feels carefully organised, efficient and quietly predictable. routes are calculated, decisions are anticipated, interfaces remove friction, and systems guide us from one action to the next. this efficiency is useful, but when everything works as expected, we can move through daily life without fully noticing where we are.</p>
+
+      <p class="why-now-copy">in this project, now does not simply mean the present time. it describes a brief moment of conscious presence: a small interruption in which someone becomes aware, <span class="why-now-quote">&ldquo;i am here, and this is happening now.&rdquo;</span></p>
+
+      <p class="why-now-copy">these moments cannot always be planned. they may begin with a mistake, an improvised solution, an unexpected object, or something ordinary behaving strangely. such encounters briefly interrupt the smoothness of a system and invite us to look again.</p>
+
+      <p class="why-now-copy">this is why now matters now. the project is not against order, efficiency or technology. it asks what might be lost when life becomes too seamless&mdash;and whether small moments of friction, imperfection and surprise can return a little awareness and agency to everyday experience.</p>
+    </section>
+
+    <section id="panel-did" class="about-panel" role="tabpanel" aria-labelledby="tab-did" hidden>
+      <p class="did-copy">first, and perhaps most importantly: who am i?</p>
+
+      <p class="did-copy">my name is yunshu qin, people also call me summer. i am someone who likes walking without a destination, noticing little things, and taking photos before i have decided whether they are important.</p>
+
+      <p class="did-copy">i began with what was already around me. i walked, looked and collected. i photographed small encounters in everyday spaces: things that seemed slightly out of place, improvised, accidentally funny, or briefly alive.</p>
+
+      <p class="did-copy">i turned some of these encounters into images and a short film. rather than trying to explain everything immediately, i wanted to hold on to the moment when something ordinary first becomes strange enough to notice.</p>
+
+      <p class="did-copy">i also made small interventions and invitations. some ask people to look differently, some introduce a minor disruption into an ordinary situation, and some leave space for other people to add their own observations.</p>
+
+      <p class="did-copy">this website brings these parts together. it is an archive of collected moments, a place to share interventions, and an invitation to notice or take away a little thing. it is also an intervention itself: a small digital space that asks visitors to slow down, look again, and see what happens.</p>
+
+      <!-- Links to Instagram, opened in a new tab - see "#about-did-figure"
+           in about.css for its positioning/sizing/idle animation (all
+           unchanged, just retargeted from the image to this wrapping
+           link, so the whole visible figure - not just part of it - is
+           the clickable area). "rel="noopener noreferrer"" is the
+           standard safeguard for any "target="_blank"" link. The image
+           itself stays purely decorative ("alt="""), since the link's
+           own "aria-label" already names its destination. -->
+      <a id="about-did-figure" href="https://www.instagram.com/summerbalabaladududu/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="visit yunshu qin's instagram">
+        <img src="assets/images/yunshu-paper-figure.png" alt="" draggable="false">
+      </a>
+    </section>
+  </main>
+
+  <script src="about.js"></script>
+</body>
+</html>

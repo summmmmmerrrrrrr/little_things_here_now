@@ -1,0 +1,423 @@
+/* ==========================================================================
+   TAKE A LITTLE THING PAGE - DESKTOP / IPAD LANDSCAPE / IPAD PORTRAIT
+   (page shell only)
+   Header (heading + logo) is copied directly from collected.css's own
+   equivalent (itself copied from interventions.css/about.css), not
+   reinvented, so "take a little thing" lines up exactly the same as
+   "collected little things"/"interventions"/"about the project" - kept
+   as its own, fully separate file (not literally sharing about.css/
+   interventions.css/collected.css) so nothing here can ever affect any
+   of those pages, or vice versa.
+   Reuses --font-main and --logo-margin/--logo-width from style.css
+   (already linked in take.html) rather than redefining them.
+   Below the header: nothing yet - the downloadable souvenir content is
+   a later pass. iPad portrait needs no separate rules of its own (the
+   fixed-position header is small and comfortably clear of every edge
+   at that width, same as it already is on the about/interventions/
+   collected pages); iPhone portrait gets its own, separate stacked
+   header (see "IPHONE PORTRAIT" at the bottom).
+   ========================================================================== */
+
+:root {
+  --take-nav-top: clamp(24px, 4vh, 48px);
+  --take-nav-left: clamp(24px, 3vw, 48px);
+  --take-heading-size: clamp(14px, 1.1vw, 18px);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff; /* pure white, matching the rest of the site */
+  font-family: var(--font-main);
+  /* style.css's shared reset sets "height: 100%; overflow: hidden" for
+     the homepage's fixed-viewport interactive scene - overridden back
+     to normal here, same reasoning as about.css/interventions.css/
+     collected.css. The heading/logo are both "position: fixed", so
+     neither ever contributes to a scrollable page height either way -
+     the page stays within one viewport on desktop without this needing
+     to do anything extra to enforce it. */
+  height: auto;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------
+   LOGO (upper-right, same asset/system as the homepage and every other page)
+   -------------------------------------------------------------------- */
+#take-logo-link {
+  position: fixed;
+  top: max(var(--logo-margin), env(safe-area-inset-top));
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  display: block;
+  z-index: 20; /* stays above the heading */
+  cursor: pointer;
+}
+
+#take-logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto; /* preserves the PNG's own aspect ratio - never stretched/cropped */
+}
+
+/* --------------------------------------------------------------------
+   TOP-LEFT HEADING - "take a little thing", linking back to the jar
+   already open (see take.html's own comment on this link).
+   -------------------------------------------------------------------- */
+#take-heading-link {
+  position: fixed;
+  top: var(--take-nav-top);
+  left: var(--take-nav-left);
+  z-index: 10;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+#take-heading {
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--take-heading-size);
+  color: #000000;
+  white-space: nowrap; /* one line on desktop/iPad - see "IPHONE PORTRAIT" below for the only breakpoint that forces a break */
+}
+
+/* Plain inline text by default, so "take a " (note the trailing space
+   in take.html) plus this span reads as the single line "take a little
+   thing" everywhere except iPhone portrait, which switches this to
+   "display: block" - see "IPHONE PORTRAIT" below. */
+.take-heading-line-2 {
+  display: inline;
+}
+
+/* ==========================================================================
+   THE PORTAL/HAND COMPOSITION - DESKTOP / MAC ONLY
+   Everything below is this step's own new content: the jar/burning-
+   heart/wounded-heart loop. Deliberately unscoped by any media query
+   (today's desktop/Mac pass only) - no existing mobile/tablet query
+   touches any of these new IDs/classes, so nothing here affects them,
+   and a later pass can add "#take-stage" etc. overrides inside the
+   existing "IPHONE PORTRAIT" query (or a new tablet one) without
+   touching anything in this section.
+   ========================================================================== */
+
+:root {
+  /* The portal-hand image's own rendered width - height is always
+     "auto" (its true aspect ratio, 955x750, never stretched). Centred
+     on the viewport, since that's where the Figma reference has it. */
+  --take-stage-width: clamp(560px, 64vw, 900px);
+
+  /* Each object's own centre point + width, as a PERCENTAGE OF THE
+     STAGE (not the viewport) - see "#take-object" below for why: this
+     is what keeps an object visually anchored to the palm no matter
+     how "--take-stage-width" itself changes size. The jar and the two
+     hearts are different shapes, so each gets its own values, matched
+     to the Figma references. */
+  --take-jar-left: 23%;
+  --take-jar-top: 57%;
+  --take-jar-width: 26%;
+
+  /* The wounded heart only now (see ".take-object-heart" below) -
+     nudged ~3% right and ~3% up from its original 20%/60%. */
+  --take-heart-left: 23%;
+  --take-heart-top: 57%;
+  --take-heart-width: 33%;
+
+  /* The burning heart only, nudged ~3% right and ~3% up from its own
+     original 20%/60% (a separate adjustment from the wounded heart's
+     above, made in an earlier pass) - same width, so its size is
+     untouched. */
+  --take-burning-heart-left: 23%;
+  --take-burning-heart-top: 57%;
+
+  /* The three fixed text elements around the composition - none of
+     these ever move between states (only their text/visibility does,
+     via take.js), so each is just a plain, static viewport position. */
+  --take-description-left: 20vw;
+  --take-description-top: 31vh;
+  --take-decline-left: 83vw;
+
+  /* Shared by all three text elements above - matches this page's own
+     heading size ("--take-heading-size"), the same size used for this
+     kind of secondary text on every other page (e.g. collected.css's
+     "--collected-heading-size"). */
+  --take-body-size: clamp(14px, 1.1vw, 18px);
+}
+
+/* The shared wrapper for the portal-hand image and the object above
+   it - centred on the viewport. "position: relative" (implicit from
+   "position: fixed" below, which - like "relative"/"absolute" - also
+   establishes a containing block) is what lets "#take-object" below be
+   positioned as a percentage of THIS box instead of the whole
+   viewport. */
+#take-stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--take-stage-width);
+  z-index: 1;
+}
+
+/* Never changes size or position - only "#take-object" above it does. */
+#take-portal-hand {
+  display: block;
+  width: 100%;
+  height: auto; /* preserves the PNG's own aspect ratio - never stretched/cropped */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The one part of the composition that changes with the state (see
+   take.js) - which image, and which of the two position/size classes
+   below is applied. Comes after "#take-portal-hand" in take.html, so
+   it paints on top of it with no extra "z-index" needed. Positioned as
+   a percentage of "#take-stage" (its own containing block), centred on
+   its own point via "transform: translate(-50%, -50%)", matching the
+   rest of this project's own object-positioning convention (e.g.
+   collected.css's cluster/bag). "height" is never set - each object
+   keeps its own true aspect ratio via "width" + "height: auto", so
+   nothing is ever stretched, cropped, or distorted. */
+#take-object {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  height: auto;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.take-object-jar {
+  left: var(--take-jar-left);
+  top: var(--take-jar-top);
+  width: var(--take-jar-width);
+}
+
+/* The wounded heart only now - the burning heart has its own, slightly
+   adjusted position below (".take-object-burning-heart"). */
+.take-object-heart {
+  left: var(--take-heart-left);
+  top: var(--take-heart-top);
+  width: var(--take-heart-width);
+}
+
+.take-object-burning-heart {
+  left: var(--take-burning-heart-left);
+  top: var(--take-burning-heart-top);
+  width: var(--take-heart-width); /* unchanged - only the position moved, not the size */
+}
+
+/* "you got .../the little things jar paper model!" etc. - two lines,
+   set via take.js with a "\n" between them; "white-space: pre-line"
+   (rather than a "<br>") is what turns that into an actual forced line
+   break while still allowing normal wrapping within each line, the
+   same technique collected.css's own tag text uses. Positioned near
+   the upper-left of the object, to its own fixed point - this text's
+   own position never changes between states, only its content does. */
+#take-description {
+  position: fixed;
+  left: var(--take-description-left);
+  top: var(--take-description-top);
+  margin: 0;
+  max-width: 30vw;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--take-body-size);
+  line-height: 1.5; /* spacing between the two lines - same element/rule for all three states, so this applies to all of them identically */
+  color: #000000;
+  white-space: pre-line;
+  z-index: 2;
+}
+
+/* The one interaction on this page - plain text, no button/border/
+   background/underline/icon of any kind, just "cursor: pointer" (see
+   take.js for the click handling). Vertically centred on the portal,
+   to its right - fixed in place across all three states. */
+#take-decline {
+  position: fixed;
+  left: var(--take-decline-left);
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--take-body-size);
+  color: #000000;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Bottom-left, reusing the same left inset as the top-left heading
+   ("--take-nav-left") for a consistent margin. Plain text link - no
+   button/border/background/underline of any kind, just "cursor:
+   pointer". Hidden outside the jar state via "take.js" adding
+   ".take-hidden" (a plain "display: none" - no fade, matching this
+   page's own "no animation" rule). */
+#take-download {
+  position: fixed;
+  left: var(--take-nav-left);
+  bottom: clamp(24px, 4vh, 48px);
+  max-width: min(46vw, 640px);
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--take-body-size);
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#take-download.take-hidden {
+  display: none;
+}
+
+/* --------------------------------------------------------------------
+   IPHONE PORTRAIT
+   Normal document flow for the header (heading + logo stack into one
+   row), matching about.html's/interventions.html's/collected.html's
+   own responsive structure exactly.
+   -------------------------------------------------------------------- */
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  :root {
+    --take-heading-size: clamp(17px, 4.3vw, 18px);
+    --logo-width: clamp(155px, 41vw, 175px);
+    --take-phone-header-margin-x: 20px;
+    --take-phone-edge-space: clamp(24px, 6vw, 32px);
+  }
+
+  /* "white-space: normal" (instead of the desktop rule's "nowrap") is
+     what lets the heading wrap at all here; ".take-heading-line-2"
+     switching to "display: block" (see take.html's own comment on this
+     span) is what makes it break exactly at "take a" / "little thing"
+     rather than wherever the browser's own natural wrapping would
+     otherwise choose - matching "collected little things"'s own
+     identical two-line technique. "text-size-adjust: 100%" is the same
+     mobile Safari "font boosting" fix used throughout this project (see
+     interventions.css's/collected.css's own identical fix and
+     reasoning) - plain text, same fix, same reason, not an authored
+     font-size difference. */
+  #take-heading {
+    white-space: normal;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .take-heading-line-2 {
+    display: block;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* The header row: heading on the left, logo on the right, in normal
+     flow instead of fixed - matching about.html's/interventions.html's/
+     collected.html's own header row exactly. "order" is what puts the
+     heading first (left) and the logo second (right) despite the logo
+     coming first in the HTML. */
+  body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  #take-heading-link {
+    position: static;
+    order: 1;
+    margin: var(--take-phone-edge-space) 0 0 var(--take-phone-header-margin-x);
+  }
+
+  #take-logo-link {
+    position: static;
+    order: 2;
+    margin: var(--take-phone-edge-space) var(--take-phone-header-margin-x) 0 0;
+  }
+
+  /* --------------------------------------------------------------------
+     THE PORTAL/HAND COMPOSITION - IPHONE PORTRAIT
+     Everything below only redefines the SAME custom properties/rules
+     the desktop section above already uses (matching how
+     "--take-heading-size"/"--logo-width" are overridden just above) -
+     "#take-stage"'s own centring rule (left/top/transform) is left
+     completely untouched, since the Figma reference here places it at
+     roughly the same viewport centre desktop does; only its width, and
+     each object's own position/size within it, change. "#take-
+     description"/"#take-decline"/"#take-download" needed real property
+     overrides (not just new variable values) since their anchor edges
+     themselves differ here (e.g. "bottom" instead of "top" for "i
+     don't want this") - see each one below. */
+  :root {
+    --take-stage-width: clamp(300px, 88vw, 380px);
+
+    --take-jar-left: 27%;
+    --take-jar-top: 55%;
+    --take-jar-width: 31%;
+
+    --take-heart-left: 25%;
+    --take-heart-top: 50%;
+    --take-heart-width: 41%; /* shared by both hearts, same as on desktop */
+
+    --take-burning-heart-left: 26%;
+    --take-burning-heart-top: 49%;
+
+    --take-description-left: 17vw;
+    --take-description-top: 24vh;
+
+    --take-download-top: 73vh;
+    --take-decline-bottom: clamp(20px, 4vh, 40px);
+  }
+
+  /* Same "@supports" reasoning as collected.css's/interventions.css's
+     own identical phone-portrait blocks (see either for the full
+     explanation): a raw second "vh"-then-"svh" declaration on the same
+     custom property would always win the CUSTOM PROPERTY cascade, even
+     on a browser that can't actually use "svh" for the real property
+     that consumes it - so the "svh" versions only exist inside this
+     "@supports" gate, which is skipped outright (leaving the plain
+     "vh" lines above as the only ones that ever apply) on any browser
+     that doesn't support "svh". */
+  @supports (height: 1svh) {
+    :root {
+      --take-description-top: 24svh;
+      --take-download-top: 73svh;
+    }
+  }
+
+  #take-description {
+    max-width: 70vw;
+  }
+
+  /* Below the composition instead of the viewport's true bottom edge
+     (unlike the desktop rule) - "top" replaces desktop's "bottom", so
+     "bottom" itself is reset to "auto" to avoid the two conflicting.
+     "white-space: pre-line" is what turns the literal line break
+     already in take.html's own text (between "your" and "own") into an
+     actual forced break here, matching the Figma reference - desktop's
+     own default "white-space: normal" (never overridden there) just
+     collapses that same break into an ordinary space instead, so nothing
+     about the desktop rendering changes. */
+  #take-download {
+    top: var(--take-download-top);
+    bottom: auto;
+    left: var(--take-description-left);
+    max-width: 70vw;
+    white-space: pre-line;
+  }
+
+  /* Bottom centre of the viewport (unlike the desktop rule, which sits
+     to the right of the portal, vertically centred) - "top"/"transform"
+     both reset since "bottom" + "left: 50%" replace them entirely.
+     Independent of every other element here (its own "position: fixed"
+     rule, inherited unchanged from the desktop section above), so
+     nothing else moving - the object changing, the description's text
+     changing, or "#take-download" appearing/disappearing - ever shifts
+     this. */
+  #take-decline {
+    left: 50%;
+    top: auto;
+    bottom: var(--take-decline-bottom);
+    transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>my thesis process document</title>
+
+  <!-- The site's font (Fragment Mono, from Google Fonts) - loaded once
+       here per page; see --font-main in style.css for where it's applied. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <!-- Shares the homepage's stylesheet. Everything in style.css is scoped
+       to IDs that don't exist on this page (the pigeon, feather, paper,
+       etc.), so only the #process-title rule and the base white-background
+       reset actually apply here - nothing homepage-specific leaks in. -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- This page's own stylesheet - see process.css for why it exists
+       separately (it overrides style.css's own fixed-viewport
+       "overflow: hidden" reset, the same way about.css/interventions.css/
+       collected.css/take.css each already do) and for the chapter list/
+       ending styling below. -->
+  <link rel="stylesheet" href="process.css">
+</head>
+<body>
+
+  <!-- Upper-left corner: a plain link back to the homepage, and this
+       page's heading directly underneath it. Unchanged by the chapter
+       list below. -->
+  <div id="process-header">
+    <a id="home-link" href="index.html">little things here now</a>
+    <h1 id="process-title">yunshu qin's thesis process document</h1>
+  </div>
+
+  <!-- The seven chapters, one centred vertical column - each one a
+       title and a smaller italic subtitle directly underneath it, both
+       wrapped in ONE link to that chapter's own PDF (opened in a new
+       tab), so clicking either line opens it. See "CHAPTER LIST" in
+       process.css for the layout/typography. -->
+  <main id="process-chapters">
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/01-noticing.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">01 noticing</span>
+        <p class="process-chapter-subtitle">it started with a question.</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/02-questioning.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">02 questioning</span>
+        <p class="process-chapter-subtitle">but was i only noticing what i wanted to notice?</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/03-trying.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">03 trying</span>
+        <p class="process-chapter-subtitle">find it, or make it?</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/04-letting-others-in.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">04 letting others in</span>
+        <p class="process-chapter-subtitle">people notice differently.</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/05-invitation.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">05 invitation</span>
+        <p class="process-chapter-subtitle">not a fixed journey. an invitation.</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/06-little-things.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">06 little things</span>
+        <p class="process-chapter-subtitle">the project found a language.</p>
+      </a>
+    </section>
+
+    <section class="process-chapter">
+      <a class="process-chapter-link" href="assets/process-pdf/07-finding-a-container.pdf" target="_blank" rel="noopener noreferrer">
+        <span class="process-chapter-title">07 finding a container</span>
+        <p class="process-chapter-subtitle">not just looking at the project. entering it.</p>
+      </a>
+    </section>
+  </main>
+
+  <!-- A small, quiet ending below the last chapter - see "ENDING" in
+       process.css. -->
+  <div id="process-ending">
+    <p id="process-ending-emoji" aria-hidden="true">&#128038;</p>
+    <p id="process-ending-text">and somehow, a pigeon got involved.</p>
+  </div>
+
+</body>
+</html>

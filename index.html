@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>little things</title>
+
+  <!-- The site's font (Fragment Mono, from Google Fonts) - loaded once
+       here per page; see --font-main in style.css for where it's applied. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <!-- Link to our stylesheet -->
+  <!-- TEMPORARY "?v=ipad-debug-08" cache-busting query string, added
+       only to force the iPad to fetch the current file instead of a
+       cached older copy while debugging - remove once confirmed. -->
+  <link rel="stylesheet" href="style.css?v=ipad-debug-08">
+</head>
+<body>
+
+  <!-- The pigeon image. It starts hidden off-screen (handled in CSS/JS).
+       draggable="false" stops the browser's own native image dragging,
+       since script.js implements its own press-and-hold dragging instead. -->
+  <img id="pigeon" src="assets/images/pigeon.png" alt="" draggable="false">
+
+  <!-- The feather image. Starts hidden until it separates from the pigeon. -->
+  <img id="feather" src="assets/images/feather.png" alt="">
+
+  <!-- The logo, fixed in the upper-right corner, fading in at the very
+       end. It's a real <button> (not an <a>) so it's natively
+       clickable, tappable, and keyboard-operable (Enter/Space) - its
+       default button appearance is fully reset in style.css so only
+       the image itself shows, with a clickable area matching the image
+       bounds rather than some larger invisible header. The button's own
+       aria-label carries the accessible action name (unchanged from
+       when this was a text title); the image's own "alt" separately
+       describes what it displays, for cases like a broken image. -->
+  <button id="opening-text" type="button" aria-label="Restart little things here now">
+    <img id="opening-logo" src="assets/images/little-things-logo.png" alt="little things here now" draggable="false">
+  </button>
+
+  <!-- The tiny "click anywhere to begin" message, only shown if audio autoplay is blocked. -->
+  <p id="click-message">click anywhere to begin</p>
+
+  <!-- The note paper, revealed after a successful 3-second catch. Hidden until then.
+       The image and its text are wrapped together in one container, sized to
+       match the image exactly, so the text always moves and scales together
+       with the paper - positioned relative to this container, not the viewport. -->
+  <div id="paper-container">
+    <img id="note-paper" src="assets/images/note-paper.png" alt="" draggable="false">
+    <div id="paper-text">
+      <p id="paper-message">oh, you caught it.</p>
+      <a id="paper-link" href="process.html">yunshu qin&rsquo;s<br>thesis process document</a>
+    </div>
+  </div>
+
+  <!-- The masked wrestler. Hidden below the viewport until the visitor
+       clicks the landed feather. The arm is a separate layer (behind the
+       body) so it can rotate independently around the armpit/shoulder.
+       See the WRESTLER section of script.js. -->
+  <div id="wrestler">
+    <img id="wrestler-arm" src="assets/images/ticklish-wrestler-arm-empty.png" alt="" draggable="false">
+    <img id="wrestler-body" src="assets/images/ticklish-wrestler-body.png" alt="" draggable="false">
+    <div id="armpit-hit-area"></div>
+  </div>
+
+  <!-- The armpit arrow. Kept OUTSIDE #wrestler on purpose: #wrestler is
+       its own stacking context (z-index 15), which would cap the arrow
+       below the feather (z-index 100) no matter what z-index the arrow
+       itself had. Living here as a top-level element lets it use a
+       high z-index that genuinely wins. Its position is calculated
+       from #armpit-hit-area's live position by script.js (see the
+       WRESTLER section) rather than duplicated as separate coordinates. -->
+  <div id="wrestler-arrow">
+    <div id="wrestler-arrow-inner"></div>
+  </div>
+
+  <!-- The jar, once it "hands off" from the rotating arm and becomes its
+       own independent element (see startWrestlerExit() in script.js).
+       Kept OUTSIDE #wrestler for the same reason as the arrow above: so
+       it can stay perfectly still on screen (via its own fixed position)
+       while #wrestler slides away underneath it, and so its z-index can
+       place it above the arm regardless of #wrestler's own stacking
+       context. Starts hidden; script.js sizes/positions it to exactly
+       match the arm image's own rendered rectangle before revealing it.
+       Once the wrestler is fully gone, this hands off a second time
+       into #jar-scene below (see startJarCloseup()) and is then hidden
+       for good. -->
+  <img id="wrestler-jar" src="assets/images/little-things-jar.png" alt="" draggable="false">
+
+  <!-- The centred jar + four-object composition, once the wrestler has
+       left. Fixed and centred in the viewport (left/top: 50% +
+       translate(-50%,-50%)) - a zero-size anchor point that every
+       child below positions itself against with its OWN left/top: 50%
+       + transform, so nothing in this scene is ever positioned
+       relative to the raw viewport edges independently. See script.js
+       "STEP 8: THE JAR OPENS". -->
+  <div id="jar-scene">
+
+    <!-- A fixed-size box; both jar images inside fill it completely
+         (width/height: 100%; object-fit: contain), so opening the jar
+         can never change its displayed size or centre - only one
+         image is visible (opacity) at a time. #jar-visual (not
+         #jar-wrapper itself) carries the floating/opening-pop
+         animations, so they never overwrite the centring transform
+         below - see style.css for how the layers split up. -->
+    <div id="jar-wrapper">
+      <div id="jar-visual">
+        <img id="jar-closed" src="assets/images/little-things-jar-closeup.png" alt="" draggable="false">
+        <img id="jar-open" src="assets/images/little-things-jar-open.png" alt="" draggable="false">
+      </div>
+    </div>
+
+    <!-- The four "little things" objects. Each has THREE nested levels:
+         an outer wrapper (its fixed quadrant position relative to the
+         jar's centre - see style.css), an inner wrapper (the
+         grow-from-the-jar reveal animation, then its own idle float),
+         and inside that, the image plus its touch-only label - so the
+         image and label always move together as one unit, while the
+         quadrant position itself is never touched by either animation.
+         Starts hidden; script.js reveals each one at once, all
+         together, once the jar is clicked (see revealObjects()).
+         aria-label names each image for assistive tech, since "alt" is
+         intentionally empty (purely decorative image content); the
+         touch label text is aria-hidden since it just repeats that same
+         name visually - see script.js for the desktop hover tooltip,
+         which also uses these same four names. -->
+    <div class="jar-object-wrapper" id="fortune-teller-wrapper">
+      <div class="jar-object-inner" id="fortune-teller-inner">
+        <img class="jar-object" id="object-fortune-teller" src="assets/images/about-paper-fortune-teller.png" alt="" aria-label="about the project" draggable="false">
+        <span class="jar-object-label" aria-hidden="true">about the project</span>
+      </div>
+    </div>
+    <div class="jar-object-wrapper" id="tape-dispenser-wrapper">
+      <div class="jar-object-inner" id="tape-dispenser-inner">
+        <img class="jar-object" id="object-tape-dispenser" src="assets/images/interventions-tape-dispenser.png" alt="" aria-label="interventions" draggable="false">
+        <span class="jar-object-label" aria-hidden="true">interventions</span>
+      </div>
+    </div>
+    <div class="jar-object-wrapper" id="bag-wrapper">
+      <div class="jar-object-inner" id="bag-inner">
+        <img class="jar-object" id="object-bag" src="assets/images/collected-little-things-bag.png" alt="" aria-label="collected little things" draggable="false">
+        <span class="jar-object-label" aria-hidden="true">collected little things</span>
+      </div>
+    </div>
+    <div class="jar-object-wrapper" id="portal-hand-wrapper">
+      <div class="jar-object-inner" id="portal-hand-inner">
+        <img class="jar-object" id="object-portal-hand" src="assets/images/take-a-little-thing-portal-hand.png" alt="" aria-label="take a little thing" draggable="false">
+        <span class="jar-object-label" aria-hidden="true">take a little thing</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- The one shared tooltip for all four objects above - script.js
+       moves it and swaps its text depending on which object is
+       hovered/tapped, rather than giving each object its own. Starts
+       empty/hidden (opacity: 0); aria-hidden since each object already
+       has its own aria-label carrying the same text. -->
+  <div id="object-tooltip" aria-hidden="true"></div>
+
+  <!-- Audio elements. "preload" gets them ready early. They are not visible on the page. -->
+  <audio id="cooing-sound" src="assets/audio/pigeon-cooing.mp3" preload="auto"></audio>
+  <audio id="flapping-sound" src="assets/audio/wing-flapping.mp3" preload="auto"></audio>
+  <audio id="caught-sound" src="assets/audio/pigeon-caught.mp3" preload="auto"></audio>
+  <audio id="paper-sound" src="assets/audio/paper-open.mp3" preload="auto"></audio>
+
+  <!-- The "about the project" overlay. Opened in place of navigating
+       away when the jar's fortune-teller object is clicked (see
+       jarObjects/openAboutOverlay() in script.js) - this page (its
+       DOM, the open jar, the four navigation objects, their floating
+       animations, every timer) is never touched, reset, or reloaded
+       while it's open or once it's closed again. Reuses the existing,
+       unmodified about.html/about.css/about.js inside an iframe
+       instead of duplicating any of their markup or styles - the
+       iframe's document is fully isolated from this page's, so
+       nothing about.css does (including its own "overflow" rules) can
+       ever leak into or affect the homepage underneath. "src" is left
+       empty here and only set once the overlay is actually opened, so
+       about.html isn't fetched/loaded until it's needed. Closing is
+       handled by about.html's own existing "little things here now"
+       links (see about.js), not a separate control here - see
+       closeAboutOverlay()/window.closeAboutOverlay in script.js. -->
+  <div id="about-overlay" hidden>
+    <iframe id="about-overlay-frame" title="About the project"></iframe>
+  </div>
+
+  <!-- TEMPORARY - tablet-portrait-only debug status for diagnosing the
+       "tapping the feather does nothing on iPad portrait" report - see
+       "#portrait-feather-debug" in style.css (visible only inside the
+       existing tablet-portrait media query, not phone portrait, not
+       landscape, not desktop) and setPortraitFeatherDebugStatus() in
+       script.js. Remove once confirmed fixed. -->
+  <div id="portrait-feather-debug">FEATHER: WAITING</div>
+
+  <!-- Link to our JavaScript, placed at the end so the page loads first -->
+  <!-- Cache-busting query string, left in place for development -
+       harmless either way, no visible effect. -->
+  <script src="script.js?v=ipad-debug-08"></script>
+</body>
+</html>

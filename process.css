@@ -1,0 +1,114 @@
+/* ==========================================================================
+   PROCESS.HTML - OWN STYLESHEET
+   Everything about the top-left nav (#process-header/#home-link/
+   #process-title) stays exactly as it already was, defined in
+   style.css - untouched here. This file exists for two things only:
+
+   1. style.css's own shared "html, body { overflow: hidden; height:
+      100%; }" reset is built for the homepage's fixed, one-viewport
+      interactive scene - about.css/interventions.css/collected.css/
+      take.css each already override it back to a normal, scrollable
+      page for their own content; this page needs that same override
+      now too, since the chapter list below is taller than one screen
+      on most devices.
+   2. The chapter list and closing pigeon line - see "CHAPTER LIST" and
+      "ENDING" further down.
+
+   Kept as its own file (not added into style.css) for the exact same
+   reason those other pages' stylesheets are separate: so nothing here
+   can ever affect any other page, or vice versa.
+   ========================================================================== */
+
+html, body {
+  height: auto;
+  overflow: visible;
+  overflow-x: hidden; /* the centred chapter list is width-constrained below, but this keeps horizontal scrolling impossible either way */
+}
+
+/* --------------------------------------------------------------------
+   CHAPTER LIST - one centred vertical column, clear of the fixed
+   top-left nav above it (see "padding-top" below). Each chapter is a
+   title (linking to that chapter's own PDF) and a smaller italic
+   subtitle directly underneath - both centre-aligned, no boxes,
+   borders, or backgrounds. "--process-chapter-gap" is the generous
+   space between one chapter group and the next; the title/subtitle's
+   own small "margin" (below) is what keeps a subtitle close to its own
+   title instead.
+   -------------------------------------------------------------------- */
+#process-chapters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(120px, 16vh, 180px) 24px 0;
+  text-align: center;
+}
+
+.process-chapter {
+  margin-bottom: clamp(48px, 7vh, 96px); /* the "significantly more space between one chapter group and the next" */
+}
+
+.process-chapter:last-child {
+  margin-bottom: 0;
+}
+
+/* Wraps both the title and subtitle below in ONE link, so either line
+   opens the chapter's PDF - a plain reset (no underline, colour
+   change, button background, or border of any kind) so it's the two
+   lines' own existing typography, untouched, that's actually visible;
+   ".process-chapter-title"/".process-chapter-subtitle" below still
+   carry every bit of that styling themselves, exactly as before. */
+.process-chapter-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.process-chapter-title {
+  display: block;
+  text-align: center;
+  font-family: var(--font-main);
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 400; /* regular, not bold */
+  font-style: normal;
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.process-chapter-subtitle {
+  margin: 0.4em auto 0;
+  max-width: min(560px, 84vw); /* lets a long subtitle wrap naturally on a narrow screen instead of overflowing it */
+  text-align: center;
+  font-family: var(--font-main);
+  font-size: clamp(13px, 1.3vw, 16px);
+  font-weight: 400;
+  font-style: italic; /* the one difference from the title */
+  color: #000000;
+}
+
+/* --------------------------------------------------------------------
+   ENDING - a small pigeon emoji, then one closing line, further below
+   chapter 07 than the chapters are from each other (see "margin-top").
+   -------------------------------------------------------------------- */
+#process-ending {
+  margin: clamp(96px, 12vh, 160px) auto clamp(64px, 8vh, 110px);
+  text-align: center;
+}
+
+#process-ending-emoji {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1;
+}
+
+#process-ending-text {
+  margin: 0.6em 0 0;
+  font-family: var(--font-main);
+  font-size: clamp(14px, 1.4vw, 17px);
+  font-weight: 400;
+  font-style: normal; /* not italic, unlike the chapter subtitles above */
+  color: #000000;
+}

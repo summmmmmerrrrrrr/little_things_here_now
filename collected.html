@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>little things — collected little things</title>
+
+  <!-- The site's font (Fragment Mono, from Google Fonts) - loaded once
+       here per page; see --font-main in style.css for where it's applied. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <!-- Shares the homepage's stylesheet (font, logo sizing/position
+       variables) - see collected.css for everything specific to this
+       page. A fully separate file from about.css/interventions.css -
+       not shared - so nothing here can ever affect either of those
+       pages, even though the heading/logo match them exactly. -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="collected.css">
+</head>
+<body>
+
+  <!-- Upper-right logo, same asset/size/position system as every other
+       page - see #collected-logo/#collected-logo-link in collected.css,
+       which reuse style.css's --logo-margin/--logo-width. Clicking it
+       restarts the whole site from the pigeon-opening scene (see
+       collected.js) - not just the plain navigation a link like this
+       would otherwise be, since a stale "return to the open jar"
+       flag (set when this page was reached from the jar's bag icon)
+       would otherwise make the reloaded homepage jump straight back
+       to the navigation state instead of genuinely restarting. -->
+  <a id="collected-logo-link" href="index.html" aria-label="little things here now - restart the site">
+    <img id="collected-logo" src="assets/images/little-things-logo.png" alt="little things here now" draggable="false">
+  </a>
+
+  <!-- Upper-left heading - returns directly to the homepage already in
+       its finished "jar open" state (all four navigation objects out
+       and settled) instead of replaying the pigeon/feather/wrestler
+       sequence - see the "state=open-jar" handling in script.js,
+       exactly matching the about page's/interventions page's own
+       heading behaviour. The "little things" span is plain inline text
+       (reading as one line, "collected little things") everywhere
+       except iPhone portrait, where collected.css switches it to
+       "display: block" so it drops to its own second line - see
+       "#collected-heading .collected-heading-line-2" there. -->
+  <a id="collected-heading-link" href="index.html?state=open-jar" aria-label="back to little things here now, jar already open">
+    <h1 id="collected-heading">collected <span class="collected-heading-line-2">little things</span></h1>
+  </a>
+
+  <!-- The three collected objects - a fixed desktop/iPad-landscape
+       composition (cluster left, bag centre, tag right - see "THE
+       THREE OBJECTS" in collected.css), replaced by a different,
+       vertically-stacked arrangement on iPhone portrait only. The
+       cluster is draggable (mouse or touch, via Pointer Events - see
+       "DRAGGING THE CLUSTER INTO THE BAG" in collected.js); dropping it
+       fully inside the bag locks it there permanently and swaps the
+       tag's text, otherwise it returns to its original position. The
+       bag itself stays a plain decorative image - only the cluster is
+       interactive. The tag carries its own instruction text (see
+       "#collected-tag-wrapper" in collected.css), which collected.js
+       replaces once the cluster is successfully dropped. -->
+  <img id="collected-cluster" src="assets/images/collected-things-cluster.png" alt="" draggable="false">
+  <img id="collected-bag" src="assets/images/collected-empty-bag.png" alt="" draggable="false">
+
+  <div id="collected-tag-wrapper">
+    <img id="collected-tag" src="assets/images/collected-blank-tag.png" alt="" draggable="false">
+    <p id="collected-tag-text">please put the little things in the bag.</p>
+  </div>
+
+  <!-- "see more" / "share one" - hidden (see ".collected-link" in
+       collected.css) until the cluster is successfully dropped in the
+       bag; collected.js reveals both at that same moment, alongside
+       swapping the tag's own text. Plain anchors, both to the same
+       Instagram profile, opened in a new tab. -->
+  <a id="collected-link-see-more" class="collected-link" href="https://www.instagram.com/little_things_here_now/" target="_blank" rel="noopener noreferrer">see more</a>
+  <a id="collected-link-share-one" class="collected-link" href="https://www.instagram.com/little_things_here_now/" target="_blank" rel="noopener noreferrer">share one</a>
+
+  <script src="collected.js"></script>
+</body>
+</html>

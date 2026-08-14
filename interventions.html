@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>little things — interventions</title>
+
+  <!-- The site's font (Fragment Mono, from Google Fonts) - loaded once
+       here per page; see --font-main in style.css for where it's applied. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <!-- Shares the homepage's stylesheet (font, logo sizing/position
+       variables) - see interventions.css for everything specific to
+       this page. A fully separate file from about.css - not shared -
+       so nothing here can ever affect the about page, even though the
+       navigation structure and visual language match it exactly. -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="interventions.css">
+</head>
+<body>
+
+  <!-- Upper-right logo, same asset/size/position system as the homepage
+       and the about page - see #interventions-logo/#interventions-logo-link
+       in interventions.css, which reuse style.css's --logo-margin/
+       --logo-width. Clicking it returns to the homepage and restarts
+       the opening sequence, matching the about page's own logo exactly
+       (as opposed to the title/icon below, which returns directly to
+       the already-open jar state instead). -->
+  <a id="interventions-logo-link" href="index.html" aria-label="little things here now - back to homepage">
+    <img id="interventions-logo" src="assets/images/little-things-logo.png" alt="little things here now" draggable="false">
+  </a>
+
+  <!-- Upper-left navigation: title, the tape-dispenser menu icon (the
+       same asset used for this object on the homepage's open jar), and
+       the two section tabs. Same accessible tabs pattern as the about
+       page - see interventions.js for the switching logic. -->
+  <div id="interventions-nav">
+    <!-- Both the title and the icon return to the homepage already in
+         its finished "jar open" state (all four navigation objects out
+         and settled) instead of replaying the pigeon/feather/wrestler
+         sequence - see the "state=open-jar" handling in script.js,
+         exactly matching the about page's own title/icon behaviour.
+         One shared link wraps both, since they lead to the exact same
+         place. -->
+    <a id="interventions-jar-link" href="index.html?state=open-jar" aria-label="back to little things here now, jar already open">
+      <h1 id="interventions-heading">interventions</h1>
+
+      <img id="interventions-icon" src="assets/images/interventions-tape-dispenser.png" alt="" draggable="false">
+    </a>
+
+    <div id="interventions-tabs" role="tablist" aria-label="interventions sections">
+      <button type="button" class="interventions-tab" role="tab" id="tab-try" aria-selected="true" aria-controls="panel-try">try one</button>
+      <button type="button" class="interventions-tab" role="tab" id="tab-did-someone" aria-selected="false" aria-controls="panel-did-someone">things someone did</button>
+    </div>
+  </div>
+
+  <!-- The two content panels - both intentionally empty for now (page
+       shell only, per this pass's scope). "hidden" keeps the inactive
+       one out of the accessibility tree and out of layout entirely;
+       interventions.js toggles it when a tab is clicked. -->
+  <main id="interventions-content">
+    <section id="panel-try" class="interventions-panel" role="tabpanel" aria-labelledby="tab-try">
+      <!-- The first interaction: tapping the tape peels it back (see
+           interventions.css/interventions.js). Both images share the
+           exact same canvas size and are stacked on top of each other
+           at this one shared position/size (never independently
+           centred) - tapping only crossfades which one is opaque, the
+           same way the homepage's own closed/open jar images work. -->
+      <div id="instruction-tape-wrapper" aria-label="peel back the tape">
+        <img id="instruction-tape-intact" class="instruction-tape-layer" src="assets/images/instruction-tape-intact.png" alt="" draggable="false">
+        <img id="instruction-tape-peeled" class="instruction-tape-layer" src="assets/images/instruction-tape-peeled.png" alt="" draggable="false">
+      </div>
+
+      <!-- Empty until the tape is first peeled - interventions.js fills
+           it in and reveals it (see "#intervention-task-text" in
+           interventions.css). "aria-live" announces each later swap to
+           screen readers too, since nothing else marks the change. -->
+      <p id="intervention-task-text" aria-live="polite"></p>
+    </section>
+
+    <section id="panel-did-someone" class="interventions-panel" role="tabpanel" aria-labelledby="tab-did-someone" hidden>
+      <!-- Desktop/Mac landscape collage - four Polaroid frames (see
+           "DID SOMEONE - DESKTOP COLLAGE" in interventions.css for the
+           actual layout). Exactly one tape piece per frame, each
+           overlapping its own top edge, near-vertical with a slightly
+           different angle per frame. -->
+      <!-- Tapping/clicking this one frame cycles its photo through the
+           four "intervention-green-towel-*" images (see interventions.js)
+           - the frame's own size/position never changes, only which
+           image "#did-square-photo" is currently showing. -->
+      <div id="did-square-polaroid" class="did-polaroid did-polaroid-square">
+        <img class="did-polaroid-frame" src="assets/images/polaroid-square.png" alt="" draggable="false">
+        <img id="did-square-photo" class="did-polaroid-photo did-square-photo" src="assets/images/intervention-green-towel-01.png" alt="" draggable="false">
+        <img class="did-tape did-tape-square-1" src="assets/images/intervention-tape.png" alt="" draggable="false">
+      </div>
+
+      <!-- Tapping/clicking this frame moves its photo to the next one
+           of nine "intervention-polaroid-02-photo-*" images (see
+           interventions.js), wrapping back to the first after the
+           last - same click-to-advance interaction as the square
+           frame above. The frame's own size/position never changes,
+           only which image "#did-landscape-photo" is currently
+           showing. -->
+      <div id="did-landscape-polaroid" class="did-polaroid did-polaroid-landscape">
+        <img class="did-polaroid-frame" src="assets/images/polaroid-landscape.png" alt="" draggable="false">
+        <img id="did-landscape-photo" class="did-polaroid-photo did-landscape-photo" src="assets/images/intervention-polaroid-02-photo-01.png" alt="" draggable="false">
+        <img class="did-tape did-tape-landscape-1" src="assets/images/intervention-tape.png" alt="" draggable="false">
+      </div>
+
+      <!-- Tapping/clicking this frame moves its photo to the next one
+           of six "intervention-polaroid-01-photo-*" images (see
+           interventions.js), wrapping back to the first after the
+           last - same click-to-advance interaction as the square and
+           landscape frames above. The frame's own size/position never
+           changes, only which image "#did-tall-photo" is currently
+           showing. -->
+      <div id="did-tall-polaroid" class="did-polaroid did-polaroid-tall">
+        <img class="did-polaroid-frame" src="assets/images/polaroid-portrait-tall.png" alt="" draggable="false">
+        <img id="did-tall-photo" class="did-polaroid-photo did-tall-photo" src="assets/images/intervention-polaroid-01-photo-01.jpeg" alt="" draggable="false">
+        <img class="did-tape did-tape-tall-1" src="assets/images/intervention-tape.png" alt="" draggable="false">
+      </div>
+
+      <!-- The fourth frame is a submission-card link, not a gallery -
+           the whole frame (including the text) opens the Instagram
+           account in a new tab. Text sits below the frame in the DOM
+           (see ".did-submit-text" in interventions.css) so it never
+           needs its own click handling - the whole "<a>" is the link. -->
+      <a id="did-submit-polaroid" class="did-polaroid did-polaroid-short" href="https://www.instagram.com/little_things_here_now/" target="_blank" rel="noopener noreferrer">
+        <img class="did-polaroid-frame" src="assets/images/polaroid-portrait-short.png" alt="" draggable="false">
+        <div class="did-submit-text">
+          <p class="did-submit-line">did you make a small intervention?</p>
+          <p class="did-submit-stanza">something harmless,<br>slightly out of place,<br>or quietly changed<br>in everyday life?</p>
+          <p class="did-submit-line">send it to us.</p>
+          <p class="did-submit-line did-submit-cta">submit one &rarr;</p>
+        </div>
+        <img class="did-tape did-tape-short-1" src="assets/images/intervention-tape.png" alt="" draggable="false">
+      </a>
+    </section>
+  </main>
+
+  <script src="interventions.js"></script>
+</body>
+</html>

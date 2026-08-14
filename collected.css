@@ -1,0 +1,507 @@
+/* ==========================================================================
+   COLLECTED LITTLE THINGS PAGE - DESKTOP / IPAD LANDSCAPE
+   Header (heading + logo) is copied directly from interventions.css's
+   own equivalent (itself copied from about.css), not reinvented, so
+   "collected little things" lines up exactly the same as "about the
+   project"/"interventions" - kept as its own, fully separate file (not
+   literally sharing about.css/interventions.css) so nothing here can
+   ever affect either of those pages, or vice versa.
+   Reuses --font-main and --logo-margin/--logo-width from style.css
+   (already linked in collected.html) rather than redefining them.
+   Below the header: the three collected objects, in a fixed desktop
+   composition (cluster left, bag centre - the largest, tag right) -
+   see "THE THREE OBJECTS" further down. Untouched by iPad landscape
+   (the same rules apply there too, matching "iPad landscape... should
+   use the desktop/landscape composition"); iPhone landscape gets one
+   small safety cap (see "PHONE LANDSCAPE" further down) so nothing
+   overflows a short viewport; iPhone portrait gets its own, separate
+   vertical arrangement (see "IPHONE PORTRAIT" at the bottom).
+   ========================================================================== */
+
+:root {
+  --collected-nav-top: clamp(24px, 4vh, 48px);
+  --collected-nav-left: clamp(24px, 3vw, 48px);
+  --collected-heading-size: clamp(14px, 1.1vw, 18px);
+
+  /* THE THREE OBJECTS (desktop/iPad landscape) - each one's own centre
+     point ("left"/"top", a percentage of the viewport) and displayed
+     width; "height" is never set - every object uses its own PNG's
+     natural aspect ratio via "width" + "height: auto", so nothing is
+     ever stretched, cropped, or distorted. Cluster/bag are matched to
+     the Mac Figma reference's own approximate percentages (~27-30vw
+     and ~35-38vw); the tag was enlarged to ~1.3x its own original
+     ~18-21vw reference size afterwards, so its own vw figure below no
+     longer maps directly to that reference. Positioned so the three
+     never overlap even at the extremes of their own ranges. */
+  --collected-cluster-width: clamp(300px, 28.5vw, 520px);
+  --collected-cluster-left: 17%;
+  --collected-cluster-top: 54%;
+
+  --collected-bag-width: clamp(380px, 36.5vw, 660px);
+  --collected-bag-left: 50%;
+  --collected-bag-top: 50%;
+
+  --collected-tag-width: clamp(260px, 25.35vw, 442px);
+  --collected-tag-left: 83%;
+  --collected-tag-top: 54%;
+
+  /* "SEE MORE" / "SHARE ONE" LINKS (desktop/iPad landscape) - revealed
+     only after a successful drop (see "SEE MORE / SHARE ONE LINKS"
+     further down). "--collected-links-left" reuses the cluster's own
+     resting spot ("--collected-cluster-left" above) - once the cluster
+     has been dragged into the bag, that spot is empty, so the two
+     links take its place instead of needing a new position of their
+     own. Their own "top"s are matched to the Mac reference image. */
+  --collected-links-left: var(--collected-cluster-left);
+  --collected-see-more-top: 40%;
+  --collected-share-one-top: 60%;
+
+  /* How far the invisible tap-area extends past each link's own visible
+     text on every side (see ".collected-link::before" further down) -
+     a negative "inset" makes that box bigger than the text itself. */
+  --collected-link-tap-inset: -14px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff; /* pure white, matching the rest of the site */
+  font-family: var(--font-main);
+  /* style.css's shared reset sets "height: 100%; overflow: hidden" for
+     the homepage's fixed-viewport interactive scene - overridden back
+     to normal here, same reasoning as about.css/interventions.css. All
+     three objects below are "position: fixed", so none of them ever
+     contribute to a scrollable page height either way - the page stays
+     within one viewport on desktop without this needing to do
+     anything extra to enforce it. */
+  height: auto;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------
+   LOGO (upper-right, same asset/system as the homepage and every other page)
+   -------------------------------------------------------------------- */
+#collected-logo-link {
+  position: fixed;
+  top: max(var(--logo-margin), env(safe-area-inset-top));
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  display: block;
+  z-index: 20; /* stays above the heading and the three objects */
+  cursor: pointer;
+}
+
+#collected-logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto; /* preserves the PNG's own aspect ratio - never stretched/cropped */
+}
+
+/* --------------------------------------------------------------------
+   TOP-LEFT HEADING - "collected little things", linking back to the
+   jar already open (see collected.html's own comment on this link).
+   -------------------------------------------------------------------- */
+#collected-heading-link {
+  position: fixed;
+  top: var(--collected-nav-top);
+  left: var(--collected-nav-left);
+  z-index: 10;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+#collected-heading {
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--collected-heading-size);
+  color: #000000;
+  white-space: nowrap; /* one line on desktop/iPad - "collected " + this span read together */
+}
+
+/* Plain inline text by default, so "collected " (note the trailing
+   space in collected.html) plus this span reads as the single line
+   "collected little things" everywhere except iPhone portrait, which
+   switches this to "display: block" - see "IPHONE PORTRAIT" below. */
+.collected-heading-line-2 {
+  display: inline;
+}
+
+/* --------------------------------------------------------------------
+   THE THREE OBJECTS - see the ":root" block above for each one's own
+   position/size variables. The cluster/bag are still plain images,
+   centred on their own point via "transform: translate(-50%, -50%)",
+   matching the homepage's own jar/object pattern. The tag is now a
+   wrapper (see below) instead, since it carries its own text on top of
+   its image.
+   -------------------------------------------------------------------- */
+#collected-cluster,
+#collected-bag {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The cluster is draggable (see collected.js) - kept above the bag with
+   a higher "z-index" (both while dragging AND once permanently dropped
+   inside it, matching the reference screenshots), and given the same
+   touch-drag safety properties as the homepage's own pigeon/feather
+   ("touch-action: none" lets a finger drag it without also scrolling
+   the page; "-webkit-touch-callout: none" stops iOS's long-press "save
+   image" menu from hijacking the drag). "cursor: grab" here is the
+   resting state - collected.js switches it to "grabbing" while a drag
+   is in progress, and drops it entirely once the cluster is locked in
+   the bag. */
+#collected-cluster {
+  left: var(--collected-cluster-left);
+  top: var(--collected-cluster-top);
+  width: var(--collected-cluster-width);
+  z-index: 2; /* above the bag (1), below the heading (10) and logo (20) */
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+#collected-bag {
+  left: var(--collected-bag-left);
+  top: var(--collected-bag-top);
+  width: var(--collected-bag-width);
+  z-index: 1; /* below the heading (10) and logo (20), below the cluster (2) */
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------
+   THE TAG - now a wrapper around both the tag image and its own
+   instruction text (initial state only - no drag/drop or message
+   changes yet), the same "image + overlaid text, one shared position"
+   structure interventions.css's own submission card uses. The wrapper
+   carries the position/size ("--collected-tag-*" above); the image
+   inside it is a plain "width: 100%; height: auto" child, so nothing
+   about its own size/position changed from before.
+   -------------------------------------------------------------------- */
+#collected-tag-wrapper {
+  position: fixed;
+  left: var(--collected-tag-left);
+  top: var(--collected-tag-top);
+  width: var(--collected-tag-width);
+  transform: translate(-50%, -50%);
+  z-index: 1; /* below the heading (10) and logo (20) */
+}
+
+#collected-tag {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Positioned inside the tag's own transparent canvas, clear of the
+   punched hole (roughly the left ~16% of the tag, vertically centred)
+   - "left" starts well past it, "top" + "transform: translateY(-50%)"
+   centre the text block on the tag's own vertical middle (matching the
+   hole's own vertical centre too), and "max-width" keeps it comfortably
+   clear of the tag's right/top/bottom edges. Font size matches the
+   "collected little things" title on desktop (this page's own
+   "--collected-heading-size") - see the iPhone portrait block further
+   down for its own, different size. "white-space: pre-line" is a no-op
+   for the initial one-line instruction (it has no line breaks in it),
+   but lets collected.js's own post-drop thank-you message (three lines,
+   joined with "\n") render as forced line breaks while still wrapping
+   normally within each line if a narrow width ever requires it. */
+#collected-tag-text {
+  position: absolute;
+  left: 22%;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 68%;
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--collected-heading-size);
+  line-height: 1.4;
+  color: #000000;
+  text-align: left;
+  white-space: pre-line;
+}
+
+/* --------------------------------------------------------------------
+   "SEE MORE" / "SHARE ONE" LINKS - plain text links to the project's
+   Instagram, hidden ("opacity: 0" + "pointer-events: none", the same
+   hide/reveal pattern as "#click-message" on the homepage in style.css)
+   until the cluster is successfully dropped in the bag - collected.js
+   adds the shared ".visible" class to both at that same moment, right
+   alongside swapping the tag's own text. Desktop position (left of the
+   bag, matching the Mac reference) comes from the ":root" variables
+   above; iPhone portrait repositions them entirely (see "IPHONE
+   PORTRAIT" further down).
+   -------------------------------------------------------------------- */
+.collected-link {
+  position: fixed;
+  left: var(--collected-links-left);
+  top: var(--collected-see-more-top); /* overridden per-link below */
+  transform: translateY(-50%);
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--collected-heading-size);
+  color: #000000;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1; /* below the heading (10) and logo (20) */
+  opacity: 0;
+  pointer-events: none;
+}
+
+.collected-link.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* An invisible, oversized hit box (see "--collected-link-tap-inset"
+   above) layered behind each link via "::before" - since the link
+   itself is already positioned ("position: fixed"), it's a valid
+   anchor for this, so the enlarged tap area needs no padding/margin
+   tricks that could otherwise nudge the visible text itself. Comfortably
+   large for a fingertip on touch, and harmless on desktop (a mouse
+   click anywhere in the enlarged box still counts, but nothing about
+   how the link looks changes either way). */
+.collected-link::before {
+  content: '';
+  position: absolute;
+  inset: var(--collected-link-tap-inset);
+}
+
+#collected-link-see-more {
+  top: var(--collected-see-more-top);
+}
+
+#collected-link-share-one {
+  top: var(--collected-share-one-top);
+}
+
+/* --------------------------------------------------------------------
+   PHONE LANDSCAPE - still the desktop composition above (unlike iPhone
+   portrait further down, nothing here changes which values apply) but
+   with a height ceiling: on a short landscape phone, the desktop
+   "width" clamp()s alone could size the bag/cluster (both close to
+   square/portrait in their own proportions) tall enough to spill past
+   the top or bottom of the viewport. Capping "max-height" instead of
+   changing "width" directly lets the browser shrink each one's
+   rendered width to match automatically (the normal replaced-element
+   sizing behaviour for "width" + "height: auto" + "max-height"
+   together), so every object's own proportions stay exactly correct -
+   this only ever activates on the few phones tall enough at their
+   widest to need it. "max-height: 600px" is this project's own
+   existing phone-vs-tablet landscape boundary (see style.css's general
+   touch-landscape rules) - iPad landscape is well above that, and
+   keeps the full, uncapped desktop sizing untouched. */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 600px) {
+  #collected-cluster,
+  #collected-bag,
+  #collected-tag {
+    max-height: 58vh;
+  }
+}
+
+/* --------------------------------------------------------------------
+   IPHONE PORTRAIT
+   Normal document flow for the header (heading + logo stack into one
+   row), matching about.html's/interventions.html's own responsive
+   structure exactly - the three objects stay "position: fixed" (a
+   separate, vertically-stacked arrangement, not part of that flex
+   row), repositioned/resized for this breakpoint via the variables
+   below. Each one's own vertical position is expressed in "vh", with
+   an "svh" override applied through "@supports" right after (see that
+   block's own comment for why a plain second declaration isn't safe
+   here) - "svh" is the guaranteed-visible "small" viewport height, so
+   sizing against it, rather than the larger one Safari briefly reports
+   before its toolbar settles, keeps every object safely on-screen
+   either way.
+   -------------------------------------------------------------------- */
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  :root {
+    --collected-heading-size: clamp(17px, 4.3vw, 18px);
+    --logo-width: clamp(155px, 41vw, 175px);
+    --collected-phone-header-margin-x: 20px;
+    --collected-phone-edge-space: clamp(24px, 6vw, 32px);
+
+    /* THE THREE OBJECTS (iPhone portrait) - a different vertical
+       arrangement (tag, then bag - the largest, then cluster,
+       top-to-bottom) rather than the desktop's side-by-side one,
+       matched to the iPhone Figma reference's own approximate
+       percentages. The tag is deliberately sized wider than the bag
+       here (unlike desktop, where it's the smallest of the three) -
+       every "top" is the viewport-height percentage each object is
+       vertically centred on; every object stays centred horizontally
+       (see "left: 50%" further down). Plain "vh" here - see the
+       "@supports" block right after this one for why "svh" isn't
+       simply declared a second time on these same lines. */
+    --collected-phone-tag-width: clamp(210px, 57vw, 280px);
+    --collected-phone-tag-top: 22vh;
+
+    --collected-phone-bag-width: clamp(180px, 52vw, 260px);
+    --collected-phone-bag-top: 48.5vh;
+
+    --collected-phone-cluster-width: clamp(140px, 41vw, 200px);
+    --collected-phone-cluster-top: 84vh;
+
+    /* "SEE MORE" / "SHARE ONE" LINKS (iPhone portrait) - below the bag,
+       centred horizontally (see "left: 50%" further down). The bag
+       itself is centred on "--collected-phone-bag-top" (48.5vh) and
+       can stand as tall as roughly 32vh at the widest end of its own
+       "--collected-phone-bag-width" clamp(), so its own bottom edge
+       falls at roughly 64-65vh on most phones - "--collected-phone-see-
+       more-top" (this link's own centre point) is set well past that,
+       leaving a clear gap even including this link's own invisible tap
+       padding (see "--collected-link-tap-inset" above). "--collected-
+       phone-share-one-top" is 14vh further down, the same comfortable
+       spacing this link keeps below "see more". Plain "vh" here too -
+       see the "@supports" block right after this one. */
+    --collected-phone-see-more-top: 74vh;
+    --collected-phone-share-one-top: 88vh;
+  }
+
+  /* Custom properties don't validate their contents when declared, so
+     a raw second "--collected-phone-*-top: Xsvh" line right after the
+     "vh" ones above would always win the CUSTOM PROPERTY cascade - even
+     on a browser that can't actually use "svh" for the real "top"
+     property that consumes it. The failure only shows up one step
+     later, when "top" tries to USE that value: if this device's Safari
+     doesn't support "svh", that substitution fails, and "top" does NOT
+     fall back to the "vh" line above - custom-property cascade
+     resolution and property-value substitution are two separate steps,
+     and by the time the second one fails, the first has already
+     discarded "vh" for good, leaving "top" at its own initial value
+     instead (this exact bug - diagnosed for "--wrestler-height"/"dvh"
+     on the homepage - is why that fix uses this same "@supports"
+     pattern). "@supports" checks feature support BEFORE the cascade
+     even considers the rule inside it, so on a browser that can't use
+     "svh" this whole block is skipped outright and the plain "vh"
+     lines above are the only ones that ever win - no collapse is
+     possible either way. */
+  @supports (height: 1svh) {
+    :root {
+      --collected-phone-tag-top: 22svh;
+      --collected-phone-bag-top: 48.5svh;
+      --collected-phone-cluster-top: 84svh;
+      --collected-phone-see-more-top: 74svh;
+      --collected-phone-share-one-top: 88svh;
+    }
+  }
+
+  /* "white-space: normal" (instead of the desktop rule's "nowrap") is
+     what lets the heading wrap at all here; ".collected-heading-line-2"
+     switching to "display: block" (see collected.html's own comment on
+     this span) is what makes it wrap exactly at "collected" / "little
+     things" rather than wherever the browser's own natural wrapping
+     would otherwise choose. "text-size-adjust: 100%" is the same
+     mobile Safari "font boosting" fix used throughout this project
+     (see interventions.css's own identical fix and reasoning) - plain
+     text, same fix, same reason, not an authored font-size difference. */
+  #collected-heading {
+    white-space: normal;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .collected-heading-line-2 {
+    display: block;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* The header row: heading on the left, logo on the right, in normal
+     flow instead of fixed - matching about.html's/interventions.html's
+     own header row exactly. "order" is what puts the heading first
+     (left) and the logo second (right) despite the logo coming first
+     in the HTML. */
+  body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  #collected-heading-link {
+    position: static;
+    order: 1;
+    margin: var(--collected-phone-edge-space) 0 0 var(--collected-phone-header-margin-x);
+  }
+
+  #collected-logo-link {
+    position: static;
+    order: 2;
+    margin: var(--collected-phone-edge-space) var(--collected-phone-header-margin-x) 0 0;
+  }
+
+  #collected-cluster {
+    left: 50%;
+    top: var(--collected-phone-cluster-top);
+    width: var(--collected-phone-cluster-width);
+  }
+
+  #collected-bag {
+    left: 50%;
+    top: var(--collected-phone-bag-top);
+    width: var(--collected-phone-bag-width);
+  }
+
+  #collected-tag-wrapper {
+    left: 50%;
+    top: var(--collected-phone-tag-top);
+    width: var(--collected-phone-tag-width);
+  }
+
+  /* 60% of "try one"'s own label size on the interventions page
+     (interventions.css's "--interventions-tab-size", phone value,
+     clamp(15px, 3.9vw, 16px) - each number here is exactly 0.6x that).
+     Left/top/max-width (so alignment/vertical centring) are unchanged
+     from the desktop rule above - only the size shrank. "text-size-
+     adjust: 100%" is the same mobile Safari "font boosting" fix used
+     on "#collected-heading" above - without it, Safari briefly renders
+     this paragraph at its own auto-inflated size on first paint (a
+     heuristic based on the fallback font's metrics, before Fragment
+     Mono finishes loading), then snaps down to this authored size once
+     it does - this is what disables that boosting outright, so the
+     authored "font-size" is the only size ever shown, from the very
+     first frame. */
+  #collected-tag-text {
+    font-size: clamp(9px, 2.34vw, 9.6px);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* "position: absolute" here (not "fixed", unlike every other
+     positioned element on this page) is deliberate: an absolutely
+     positioned element with no positioned ancestor still uses the
+     viewport for its own "top"/"left", but - unlike "fixed" - it DOES
+     count toward the page's own scrollable height if it lands below
+     the visible viewport. That's what lets the page "extend vertically
+     and remain scrollable" on a short phone, exactly as intended, with
+     nothing else needing to change. Centred horizontally (both links
+     share the same centre point, unlike the desktop rule's shared left
+     edge), stacked vertically via each one's own "top" below. */
+  #collected-link-see-more,
+  #collected-link-share-one {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  #collected-link-see-more {
+    top: var(--collected-phone-see-more-top);
+  }
+
+  #collected-link-share-one {
+    top: var(--collected-phone-share-one-top);
+  }
+}

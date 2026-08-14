@@ -1,0 +1,802 @@
+/* ==========================================================================
+   ABOUT PAGE - DESKTOP ONLY (for now)
+   Three visual areas: a fixed upper-left navigation column, a full-height
+   portrait video centred on the whole viewport (not the space beside the
+   nav), and empty white space on the right with the logo in its corner.
+   Phone/tablet layouts are a separate, later task - nothing here is
+   media-query-gated yet.
+   Reuses --font-main and --logo-margin/--logo-width from style.css
+   (already linked in about.html) rather than redefining them.
+   ========================================================================== */
+
+:root {
+  /* The left column's own position/spacing/sizes - all in one place so
+     they're easy to adjust later without hunting through the rules
+     below. clamp() keeps things reasonable across ordinary desktop and
+     laptop viewport sizes. */
+  --about-nav-top: clamp(24px, 4vh, 48px);
+  --about-nav-left: clamp(24px, 3vw, 48px);
+  --about-nav-width: clamp(200px, 16vw, 280px);
+  --about-nav-gap: clamp(14px, 2vh, 24px);
+  --about-tab-gap: clamp(6px, 1vh, 12px);
+  --about-heading-size: clamp(14px, 1.1vw, 18px);
+  --about-fortune-teller-width: clamp(90px, 8vw, 140px);
+  --about-tab-size: clamp(14px, 1.1vw, 18px);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff; /* pure white, matching the rest of the site */
+  font-family: var(--font-main);
+  /* style.css's shared reset sets "height: 100%; overflow: hidden" for
+     the homepage's fixed-viewport interactive scene - overridden back
+     to normal here, since About content (like "what is this?" below)
+     can be taller than one screen and needs to scroll normally. The
+     fixed logo/nav/video are unaffected either way, since fixed
+     positioning is relative to the viewport, not document height. */
+  height: auto;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------
+   LOGO (upper-right, same asset/system as the homepage)
+   -------------------------------------------------------------------- */
+#about-logo-link {
+  position: fixed;
+  top: max(var(--logo-margin), env(safe-area-inset-top));
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  display: block;
+  z-index: 20; /* stays above the nav column and the video */
+  cursor: pointer;
+}
+
+#about-logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto; /* preserves the PNG's own aspect ratio - never stretched/cropped */
+}
+
+/* --------------------------------------------------------------------
+   LEFT NAVIGATION (heading, fortune teller, four section tabs)
+   -------------------------------------------------------------------- */
+#about-nav {
+  position: fixed;
+  top: var(--about-nav-top);
+  left: var(--about-nav-left);
+  width: var(--about-nav-width);
+  z-index: 10; /* above the video, below the logo */
+  display: flex;
+  flex-direction: column;
+  gap: var(--about-nav-gap);
+}
+
+/* Wraps the heading + fortune teller image in one link back to the
+   homepage's open-jar state (see about.html). A flex column with the
+   same gap #about-nav itself uses, so the heading-to-image spacing
+   stays identical to before it was wrapped; the text/color resets
+   below stop the browser's default link styling from changing how the
+   heading looks. */
+#about-jar-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--about-nav-gap);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+#about-heading {
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--about-heading-size);
+  color: #000000;
+}
+
+#about-fortune-teller {
+  display: block;
+  width: var(--about-fortune-teller-width);
+  height: auto; /* preserves the PNG's own aspect ratio */
+}
+
+#about-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--about-tab-gap);
+}
+
+/* Real <button> elements (see about.html), with every default button
+   style reset so they read as plain text - no box, underline, border,
+   or button background of any kind. */
+.about-tab {
+  display: block;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--about-tab-size);
+  white-space: nowrap; /* keeps each title on one line */
+  color: #bbbbbb; /* inactive - light gray */
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Only inactive tabs darken on hover - the active tab (already black)
+   is excluded so hovering it can't visually "undo" its active state. */
+.about-tab:hover:not([aria-selected="true"]) {
+  color: #777777;
+}
+
+.about-tab[aria-selected="true"] {
+  color: #000000;
+}
+
+.about-tab:focus-visible {
+  outline: 1px solid #000000;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------
+   CONTENT PANELS
+   -------------------------------------------------------------------- */
+/* "!important" is deliberate and necessary here: an ID selector like
+   "#panel-what" (below) is MORE specific than a class+attribute
+   selector like ".about-panel[hidden]", so without this, a panel's own
+   "display: grid" would keep beating "display: none" even while
+   genuinely hidden - which was exactly the bug (the "what is this?"
+   text staying visible behind the film). "!important" overrides that
+   regardless of any panel's own specificity, guaranteeing only one
+   panel is ever visible - including any fixed/absolute-positioned
+   content inside it (like the video), since "display: none" on a
+   hidden ancestor removes its entire subtree from rendering no matter
+   how its descendants are positioned. */
+[hidden] {
+  display: none !important;
+}
+
+/* The short film: a vertical video, sized from height alone (100dvh,
+   with a 100vh fallback for browsers without dvh support - the later
+   "100dvh" declaration simply wins wherever it's understood) - width
+   follows automatically from "aspect-ratio", matching the source
+   file's own 2160x3840 portrait dimensions exactly, so nothing is
+   stretched or cropped and no "object-fit" is needed at all. Centred
+   on the whole viewport via "left: 50%" + "translateX(-50%)" - not
+   flex/grid alongside the nav column - so it stays centred in the full
+   page regardless of the nav column's own width. Touches both the top
+   and bottom edges of the page exactly (top: 0, height: 100%(d)vh),
+   with no margin either side. */
+#about-film {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100vh;
+  height: 100dvh;
+  width: auto;
+  aspect-ratio: 2160 / 3840;
+  background-color: #ffffff;
+  z-index: 5;
+}
+
+/* --------------------------------------------------------------------
+   "WHAT IS THIS?" SECTION (desktop only, for now)
+   A 12-column CSS Grid matched to a 1728x1117 Figma reference frame's
+   proportions (12 equal "stretch" columns, 0 outer margin, 20px
+   gutters) - the grid itself is fluid (repeat(12, minmax(0, 1fr)) at
+   width: 100%), so it scales across ordinary desktop/laptop widths
+   while keeping the same column relationships, rather than being
+   locked to that one reference size. Sits in normal document flow (not
+   fixed), so if its content ever runs taller than the viewport the
+   whole page just scrolls normally - see the html/body override above.
+   -------------------------------------------------------------------- */
+:root {
+  /* Roughly aligns the first paragraph with the nav's own tab list,
+     clearing the heading + fortune teller image above it. */
+  --about-content-top: clamp(180px, 22vh, 260px);
+  --about-content-bottom: clamp(48px, 6vh, 96px);
+
+  --about-body-font-size: clamp(14px, 0.95vw, 18px);
+  --about-body-line-height: 1.6; /* generous, per the reference */
+
+  /* Vertical rhythm between each piece of content - the image row
+     specifically sits close behind the second paragraph ("begins
+     immediately after"), so its own gap is deliberately smaller than
+     the other two. */
+  --about-paragraph-gap: clamp(24px, 2.6vw, 46px);
+  --about-image-row-gap: clamp(16px, 1.6vw, 28px);
+  --about-outro-gap: clamp(24px, 2.6vw, 46px);
+
+  --about-image-gap: 20px; /* exact, per the Figma spec */
+  --about-image-aspect-ratio: 4 / 5; /* same for all three, so they're always the same displayed size */
+
+  /* One variable per photo, so any crop can be nudged later without
+     touching the HTML - "center" is a reasonable starting point for
+     each. */
+  --what-is-this-curtain-position: center;
+  --what-is-this-chicken-position: center;
+  --what-is-this-gate-position: center;
+}
+
+#panel-what {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: var(--about-content-top);
+  padding-bottom: var(--about-content-bottom);
+  font-size: var(--about-body-font-size);
+  line-height: var(--about-body-line-height);
+  color: #000000; /* black body text */
+  text-align: left; /* no justification */
+}
+
+.what-is-this-intro,
+.what-is-this-body,
+.what-is-this-outro {
+  margin: 0;
+  grid-row: auto; /* each simply follows the previous one, top to bottom */
+}
+
+.what-is-this-intro {
+  grid-column: 4 / span 7;
+}
+
+.what-is-this-body {
+  grid-column: 4 / span 7;
+  margin-top: var(--about-paragraph-gap);
+}
+
+/* The project name, in the site's usual Fragment Mono, set inline
+   inside an otherwise-Helvetica (".what-copy") paragraph - reads as
+   part of the sentence, not a separate heading. */
+.inline-project-name {
+  font-family: "Fragment Mono", monospace;
+  font-size: 1em;
+  font-weight: 400;
+  white-space: nowrap;
+  vertical-align: baseline;
+  margin-right: 0.25em;
+}
+
+/* Only these three "what is this?" paragraphs use Helvetica instead of
+   the site's usual Fragment Mono - everything else on this page (and
+   every other page) is untouched. */
+.what-copy {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  text-wrap: pretty; /* nudges the browser's own line-breaking to avoid short orphan lines, on top of the explicit &nbsp; pairs in the HTML */
+}
+
+.what-is-this-images {
+  grid-column: 6 / span 6;
+  margin-top: var(--about-image-row-gap);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* three equal-width columns - "approximately two grid columns" each, of the row's own six */
+  gap: var(--about-image-gap);
+}
+
+.what-is-this-images img {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--about-image-aspect-ratio); /* same for all three, so height matches too */
+  object-fit: cover;
+  border: none;
+  border-radius: 0; /* square corners */
+  box-shadow: none;
+}
+
+#what-is-this-curtain { object-position: var(--what-is-this-curtain-position); }
+#what-is-this-chicken { object-position: var(--what-is-this-chicken-position); }
+#what-is-this-gate     { object-position: var(--what-is-this-gate-position); }
+
+.what-is-this-outro {
+  grid-column: 6 / span 4;
+  margin-top: var(--about-outro-gap);
+}
+
+/* The iPhone-portrait swipe gallery (see about.css's phone-portrait
+   block, and about.html) - hidden everywhere else, including desktop,
+   so it never affects the three-image row above. */
+.mobile-about-gallery {
+  display: none;
+}
+
+/* --------------------------------------------------------------------
+   "WHY NOW?" SECTION (desktop only, for now - same reasoning as "what
+   is this?" above: iPad portrait/landscape and iPhone landscape all
+   fall outside the phone-portrait query further down and keep using
+   these rules exactly as they are, so iPad landscape automatically
+   gets "the desktop layout, adapted to its own viewport" for free,
+   with no separate code needed).
+   Same grid, same column width, and the same shared typography
+   variables (--about-content-top/-bottom, --about-body-font-size/
+   -line-height, --about-paragraph-gap) as "what is this?" - just a
+   plain single-width column of paragraphs, since this section has no
+   side image row (so every paragraph can consistently use the same
+   width, unlike "what is this?"'s narrower final paragraph). ".what-
+   is-this-*"/"what-copy" above are untouched; this section uses its
+   own ".why-now-copy" class instead, sharing only the underlying
+   custom properties, not the selectors themselves. */
+#panel-why {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: var(--about-content-top);
+  padding-bottom: var(--about-content-bottom);
+  font-size: var(--about-body-font-size);
+  line-height: var(--about-body-line-height);
+  color: #000000;
+  text-align: left;
+}
+
+.why-now-copy {
+  grid-column: 4 / span 7;
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  text-wrap: pretty; /* nudges the browser's own line-breaking to avoid short orphan lines */
+}
+
+/* Every paragraph after the first gets the same gap "what is this?"
+   uses between its own paragraphs - the first one needs none, sitting
+   directly under the panel's own top padding instead. */
+.why-now-copy + .why-now-copy {
+  margin-top: var(--about-paragraph-gap);
+}
+
+/* --------------------------------------------------------------------
+   "WHAT DID I DO?" SECTION (desktop only, for now)
+   A small decorative paper-figure photo - purely visual and non-
+   interactive ("pointer-events: none" keeps it unclickable). "position:
+   fixed" anchors it to the viewport's bottom-right corner independent
+   of the panel's own content height or scroll position, the same
+   reasoning "#about-film" above already uses for the same kind of
+   placement. Nothing here touches the source PNG's own transparent
+   background - no background/fill is set on the image or its
+   container. iPad portrait/landscape and iPhone landscape all fall
+   outside the phone-portrait query further down and keep this exact
+   desktop placement, same as every other section on this page. See
+   further down for its own subtle idle drift animation, which applies
+   the same way regardless of breakpoint. */
+:root {
+  --about-did-figure-width: clamp(100px, 8vw, 170px);
+}
+
+#about-did-figure {
+  position: fixed;
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  bottom: max(var(--logo-margin), env(safe-area-inset-bottom));
+  width: var(--about-did-figure-width);
+  height: auto; /* preserves the PNG's own aspect ratio */
+  display: block;
+  pointer-events: auto; /* now a real link - see about.html - so the whole visible figure is clickable/tappable, on both desktop and touch */
+  cursor: pointer;
+  z-index: 1; /* bottom-right placement already keeps it clear of the top-left nav (z-index 10) and top-right logo (20); this is just a safe, deliberately low default */
+  animation: about-did-figure-drift 6s ease-in-out infinite;
+}
+
+/* Fills "#about-did-figure" (now the <a> itself, see about.html)
+   exactly, so the clickable area matches the visible image pixels -
+   no extra padding, and no default link underline/colour, since
+   there's no text here for those to apply to anyway. */
+#about-did-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* A quiet, small horizontal drift - left and back - rather than any
+   bounce/spring/decorative motion: a plain "ease-in-out" eases in and
+   out of each end smoothly (no bounce), and one full 0%->50%->100%
+   cycle IS one full "there and back" - not a half-cycle needing
+   "animation-direction: alternate" to complete the round trip. Only
+   "transform" is animated, so this can never affect layout or push
+   the panel's own text around, regardless of breakpoint - the
+   position/top/right/bottom rules above and below are untouched,
+   since "transform" is a separate property from those. Applies to the
+   whole element unconditionally (same for desktop, iPad, and phone
+   portrait), since none of that positioning changes what the drift
+   itself looks like. */
+@keyframes about-did-figure-drift {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #about-did-figure {
+    animation: none;
+  }
+}
+
+/* The body copy - same 12-column grid, same column width, and the
+   same shared typography variables (--about-content-top/-bottom,
+   --about-body-font-size/-line-height, --about-paragraph-gap) as
+   "what is this?"/"why now?" above, via its own ".did-copy" class (not
+   reusing ".what-copy"/".why-now-copy" directly, so none of those
+   panels' own rules are touched). "#about-did-figure" above stays
+   "position: fixed", so it's unaffected by this grid being added to
+   the same section - it was never a grid item and doesn't become one
+   now. */
+#panel-did {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: var(--about-content-top);
+  padding-bottom: var(--about-content-bottom);
+  font-size: var(--about-body-font-size);
+  line-height: var(--about-body-line-height);
+  color: #000000;
+  text-align: left;
+}
+
+.did-copy {
+  grid-column: 4 / span 7;
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  text-wrap: pretty; /* nudges the browser's own line-breaking to avoid short orphan lines */
+}
+
+.did-copy + .did-copy {
+  margin-top: var(--about-paragraph-gap);
+}
+
+/* --------------------------------------------------------------------
+   IPHONE PORTRAIT - "a short film" section only (for now)
+   Normal document flow instead of the desktop's fixed/centred
+   layering: the header (nav + logo) stacks at the top of the page,
+   with the full-width portrait video directly beneath it. Nothing
+   else on this page is touched, and nothing outside this query is
+   affected - iPad portrait/landscape and iPhone landscape all fall
+   outside "max-width: 600px" and keep using the desktop rules above
+   exactly as they are.
+   -------------------------------------------------------------------- */
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  :root {
+    /* Smaller than the desktop/tablet defaults so the nav and logo
+       comfortably share one row on a phone-width screen. */
+    --about-nav-width: 190px;
+    --about-phone-header-margin-x: 20px;
+
+    /* The nav group's own typography/image, sized for balance against
+       the (now larger) logo below - roughly the left two of a
+       five-column header, leaving the logo roughly the upper-right
+       three. */
+    --about-heading-size: clamp(17px, 4.3vw, 18px);
+    --about-fortune-teller-width: clamp(86px, 22vw, 96px);
+    --about-tab-size: clamp(15px, 3.9vw, 16px);
+    --about-nav-line-height: 1.65;
+
+    /* Larger than the desktop/tablet logo, to balance against the nav
+       group beside it - checked against --about-nav-width and its own
+       margin above to keep a positive gap between them down to a
+       390px-wide phone. */
+    --logo-width: clamp(155px, 41vw, 175px);
+
+    /* Shared top/bottom "edge" spacing - the same value opens the page
+       (above "about the project") and closes the header (below "what
+       did i do?", before the video), so both gaps read as equal. */
+    --about-phone-edge-space: clamp(24px, 6vw, 32px);
+
+    /* Smaller than the desktop figure, to fit the narrower upper-right
+       gap beside the nav column instead of desktop's spacious
+       bottom-right corner - see "#about-did-figure" further down. */
+    --about-did-figure-width: clamp(70px, 22vw, 100px);
+  }
+
+  .about-tab {
+    line-height: var(--about-nav-line-height);
+  }
+
+  html, body {
+    overflow-x: hidden; /* the video below is exactly 100% wide - this is just a safety net, never overflow-y */
+  }
+
+  /* The header row: nav on the left, logo on the right, in normal flow
+     instead of fixed. "order" is what puts the nav first (left) and
+     the logo second (right) despite the logo coming first in the HTML
+     - no markup restructuring needed. #about-content is forced onto
+     its own full-width row below via "flex: 1 0 100%", with no
+     horizontal inset of its own, so the video inside it can be
+     genuinely full-bleed. */
+  body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  #about-nav {
+    position: static;
+    order: 1;
+    width: var(--about-nav-width);
+    margin: var(--about-phone-edge-space) 0 0 var(--about-phone-header-margin-x);
+    padding-bottom: var(--about-phone-edge-space); /* the gap after "what did i do?", before the video - matches the top gap above via the same variable */
+  }
+
+  #about-logo-link {
+    position: static;
+    order: 2;
+    margin: var(--about-phone-edge-space) var(--about-phone-header-margin-x) 0 0;
+  }
+
+  /* "what did i do?" - "position: fixed" (the desktop rule above)
+     turned out to be unreliable on the real device: on this
+     particular page ("body: display: flex" plus tall scrolling
+     content), iOS Safari didn't keep it genuinely independent of the
+     page's own scroll, and it drifted with the text instead of
+     staying put. Replaced here with a completely different, more
+     robust technique instead of trying to patch "fixed" further:
+     "#panel-did" itself becomes the figure's positioning context
+     ("position: relative"), and the figure is "position: absolute"
+     within it - so it now scrolls away naturally together with this
+     panel's own content, exactly like an ordinary part of the page,
+     rather than staying pinned to the viewport. Its own extra
+     "padding-top" reserves real vertical space at the top of the
+     panel - calculated directly from the figure's own width (so it
+     always matches its actual rendered height, whatever that width
+     ends up resolving to) plus a small clear buffer - so the first
+     paragraph is pushed down and can never overlap it, at any scroll
+     position. "right" matches the logo's own right margin above, for
+     a shared edge. The desktop/iPad rule above (its own separate
+     selector) is completely untouched. */
+  #panel-did {
+    position: relative;
+    padding-top: calc(var(--about-content-top) + (var(--about-did-figure-width) * 1.9) + 24px);
+  }
+
+  #about-did-figure {
+    position: absolute;
+    top: 0;
+    right: var(--about-phone-header-margin-x);
+    bottom: auto;
+  }
+
+  /* Forces the title onto exactly two lines ("about the" / "project")
+     here only - elsewhere the two spans stay inline (their default),
+     reading as the original single-line "about the project". Each
+     line's own "white-space: nowrap" stops it from ever breaking
+     internally, however narrow the phone. */
+  .about-title-line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  #about-content {
+    order: 3;
+    flex: 1 0 100%;
+  }
+
+  /* Every piece of desktop fixed/centred positioning is removed - full
+     page flow, full viewport width, height purely from the video's own
+     intrinsic aspect ratio (never 100dvh/100vh, never a max-height),
+     so the complete portrait film is always reachable by scrolling
+     down however tall that makes the page. */
+  #about-film {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    display: block;
+    margin-top: 0; /* the gap above it comes from #about-nav's own padding-bottom, not from the video */
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: auto; /* the video's own intrinsic ratio takes over, rather than the desktop rule's explicit one */
+    object-fit: contain;
+  }
+
+  /* ------------------------------------------------------------------
+     "WHAT IS THIS?" - phone portrait only
+     A 5-column grid (matched to a 402px-wide Figma reference, but
+     fluid rather than locked to that pixel size), replacing the
+     desktop's 12-column one for this breakpoint only. Body copy sits
+     at columns 2-5; the gallery below deliberately ignores the grid's
+     columns (see ".mobile-about-gallery") to reach the full viewport
+     width, exactly like the film section's video does.
+     ------------------------------------------------------------------ */
+  :root {
+    /* Reusing the SAME variable names the desktop rules already read
+       (see "#panel-what" and ".what-is-this-body/-images/-outro"
+       earlier in this file) - overriding their values here is enough
+       to reflow everything for phone, with no need to duplicate those
+       rules' own margin-top/etc declarations. */
+    --about-content-top: var(--about-phone-edge-space);
+    --about-content-bottom: var(--about-phone-edge-space);
+    --about-paragraph-gap: clamp(20px, 5vw, 28px);
+    --about-image-row-gap: clamp(16px, 4vw, 24px);
+    --about-outro-gap: clamp(24px, 6vw, 32px);
+  }
+
+  #panel-what {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: 20px;
+  }
+
+  .what-is-this-intro,
+  .what-is-this-body,
+  .what-is-this-outro {
+    grid-column: 2 / 6;
+  }
+
+  /* The desktop three-image row is replaced by the swipe gallery below
+     - hidden here rather than resized. */
+  .what-is-this-images {
+    display: none;
+  }
+
+  /* "why now?" - same 5-column phone grid and the same offset-right
+     column (2/6) as "what is this?"'s own paragraphs just above, per
+     the Figma reference. --about-content-top/-bottom and
+     --about-paragraph-gap are already overridden for phone portrait
+     earlier in this block, so .why-now-copy (which reads those same
+     variables) picks up the phone-appropriate spacing automatically. */
+  #panel-why {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: 20px;
+  }
+
+  .why-now-copy {
+    grid-column: 2 / 6;
+    /* The "2 / 6" span reaches the grid's own right edge (the
+       viewport edge) exactly, unlike its left edge, which is pulled
+       in by skipping column 1 - so wrapped lines had no right margin
+       at all, unlike the short "why do we need..." line above them,
+       which simply never wraps far enough to reach that edge in the
+       first place. A first attempt at closing that gap used a much
+       larger padding, which overcorrected and made the column
+       noticeably narrower than that same reference line. Reusing
+       "--about-phone-edge-space" instead - the same small "edge"
+       margin already used elsewhere in this block (the page's own
+       top/bottom padding, the nav's margins) - keeps the right
+       boundary close to the question line's own natural right edge,
+       consistent with the page's existing spacing scale rather than
+       an invented value, while still narrowing the text-wrapping
+       width (via padding, not the grid span itself, so the
+       paragraph's own left edge/alignment is completely unchanged). */
+    padding-right: var(--about-phone-edge-space);
+  }
+
+  /* Keeps the quoted phrase in the third paragraph ("in this
+     project...") together as one unit at this width - without this,
+     the line break falls right after the opening curly quote,
+     stranding a lone "i on its own line with the rest of the quote
+     wrapping below it. "white-space: nowrap" forces the whole phrase
+     to move to the next line together instead, whichever line that
+     ends up being; it doesn't fix a wrap point in place, so this
+     keeps working correctly if the copy or column width ever changes
+     slightly. Scoped to iPhone portrait only - on every other
+     breakpoint ".why-now-quote" stays a plain, unstyled inline span. */
+  .why-now-quote {
+    white-space: nowrap;
+  }
+
+  /* "what did i do?" - same 5-column phone grid and the same
+     offset-right column (2/6) as "what is this?"/"why now?" above.
+     --about-content-top/-bottom and --about-paragraph-gap are already
+     overridden for phone portrait earlier in this block, so
+     ".did-copy" (which reads those same variables) picks up the
+     phone-appropriate spacing automatically. */
+  #panel-did {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: 20px;
+  }
+
+  .did-copy {
+    grid-column: 2 / 6;
+  }
+
+  /* Ignores the 5-column grid's own columns entirely (grid-column: 1/6
+     just keeps it out of columns 2-5's flow) in favour of an explicit
+     100vw width, so adjacent slides can peek in from both edges of the
+     actual viewport - same idea as the film section's full-bleed video.
+     "overflow-x: hidden" is on html/body only (see above), never here,
+     so the gallery's own horizontal scrolling still works; that outer
+     rule just stops any scrollbar-width rounding from the "100vw"
+     below creating page-level horizontal scroll. */
+  .mobile-about-gallery {
+    display: flex;
+    grid-column: 1 / 6;
+    margin-top: var(--about-image-row-gap);
+    gap: 20px;
+    width: 100vw;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-inline: 21vw;
+    box-sizing: border-box;
+  }
+
+  .mobile-about-gallery::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-about-slide {
+    flex: 0 0 58vw;
+    display: block;
+    width: 58vw;
+    height: auto;
+    max-width: none;
+    object-fit: contain;
+    aspect-ratio: auto; /* each image's own intrinsic ratio, not a forced one - so heights can differ between slides */
+    align-self: flex-start; /* top-edge alignment, since the gallery's default flex "stretch" would otherwise force equal heights */
+    scroll-snap-align: center;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* --------------------------------------------------------------------
+   IPHONE LANDSCAPE - body copy, all three text panels
+   No rule anywhere sets a different font-size for any of these
+   paragraphs - #panel-what/#panel-why/#panel-did all share the same
+   "font-size: var(--about-body-font-size)" (see above), inherited
+   identically by ".what-copy"/".why-now-copy"/".did-copy" alike, and
+   nothing overrides it. The inconsistency instead comes from mobile
+   Safari's own automatic text-size-adjust ("font boosting"): it
+   independently inflates narrow text columns to stay readable without
+   zooming. ".what-copy" was disabling this already (originally to fix
+   an inconsistency between ".what-is-this-outro"'s narrower grid
+   column and its own wider siblings), while ".why-now-copy"/".did-
+   copy" were not - so "what is this?" was rendering at the true,
+   un-boosted size while "why now?"/"what did i do?" were still being
+   boosted, producing a size mismatch between panels even though the
+   authored font-size (and line-height, never touched by this rule
+   either way) is identical for all three. Disabling that same browser
+   heuristic for the other two panels too - not changing any authored
+   size - is what makes all three render consistently. Scoped to
+   iPhone landscape only via the same "max-height: 600px" boundary
+   style.css's own phone-vs-tablet landscape split already uses
+   elsewhere on this site (every iPhone in landscape is well under
+   that; every iPad in landscape is well over it), so iPad landscape -
+   and everything else - is unaffected. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 600px) {
+  .what-copy,
+  .why-now-copy,
+  .did-copy {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------
+   IPAD LANDSCAPE - "why now?" body copy only
+   On a wide iPad landscape viewport, ".why-now-copy"'s desktop column
+   ("grid-column: 4 / span 7", see above) is wide enough that a
+   paragraph's last line can end up with only one short word on it
+   (e.g. "are."). "text-wrap: pretty" (already applied to every
+   ".why-now-copy" paragraph via the desktop rule above) already asks
+   the browser to avoid this where it can, but doesn't guarantee it at
+   every width/content combination. A small, further narrowing of the
+   actual text measure - not the grid position itself, so the
+   paragraph's own left edge is completely unchanged - shifts where
+   each line wraps just enough to make an orphaned final word far less
+   likely, without changing font-size or letter-spacing. Scoped to
+   iPad landscape only via "min-height: 601px" - the inverse of the
+   "max-height: 600px" boundary used just above for iPhone landscape -
+   so every current iPhone in landscape stays excluded, and desktop/
+   Mac (no "pointer: coarse") is unaffected either way. */
+@media (pointer: coarse) and (orientation: landscape) and (min-height: 601px) {
+  .why-now-copy {
+    max-width: 94%;
+  }
+}

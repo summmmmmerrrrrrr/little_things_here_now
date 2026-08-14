@@ -1,0 +1,802 @@
+/* ==========================================================================
+   INTERVENTIONS PAGE - DESKTOP / IPAD LANDSCAPE (page shell only)
+   Follows the exact same navigation structure and visual language as
+   about.css - a fixed upper-left nav column (title + icon + tab list)
+   and the same upper-right logo system - but kept as its own, fully
+   separate file (not literally sharing about.css) so nothing here can
+   ever affect the about page, or vice versa, even though the visual
+   result matches it. Every value below is copied directly from
+   about.css's own equivalent, not reinvented.
+   Reuses --font-main and --logo-margin/--logo-width from style.css
+   (already linked in interventions.html) rather than redefining them.
+   Content panels are intentionally empty/unstyled for now - this pass
+   is the page shell only.
+   ========================================================================== */
+
+:root {
+  /* The left column's own position/spacing/sizes - same values as
+     about.css's equivalent block. */
+  --interventions-nav-top: clamp(24px, 4vh, 48px);
+  --interventions-nav-left: clamp(24px, 3vw, 48px);
+  --interventions-nav-width: clamp(200px, 16vw, 280px);
+  --interventions-nav-gap: clamp(14px, 2vh, 24px);
+  --interventions-tab-gap: clamp(6px, 1vh, 12px);
+  --interventions-heading-size: clamp(14px, 1.1vw, 18px);
+  --interventions-icon-width: clamp(90px, 8vw, 140px);
+  --interventions-tab-size: clamp(14px, 1.1vw, 18px);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff; /* pure white, matching the rest of the site */
+  font-family: var(--font-main);
+  /* style.css's shared reset sets "height: 100%; overflow: hidden" for
+     the homepage's fixed-viewport interactive scene - overridden back
+     to normal here, since future content on this page may be taller
+     than one screen and will need to scroll normally, same reasoning
+     as about.css. */
+  height: auto;
+  overflow: visible;
+}
+
+/* --------------------------------------------------------------------
+   LOGO (upper-right, same asset/system as the homepage and about page)
+   -------------------------------------------------------------------- */
+#interventions-logo-link {
+  position: fixed;
+  top: max(var(--logo-margin), env(safe-area-inset-top));
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  display: block;
+  z-index: 20; /* stays above the nav column */
+  cursor: pointer;
+}
+
+#interventions-logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto; /* preserves the PNG's own aspect ratio - never stretched/cropped */
+}
+
+/* --------------------------------------------------------------------
+   LEFT NAVIGATION (title, tape-dispenser icon, two section tabs)
+   -------------------------------------------------------------------- */
+#interventions-nav {
+  position: fixed;
+  top: var(--interventions-nav-top);
+  left: var(--interventions-nav-left);
+  width: var(--interventions-nav-width);
+  z-index: 10; /* above the (currently empty) content, below the logo */
+  display: flex;
+  flex-direction: column;
+  gap: var(--interventions-nav-gap);
+}
+
+/* Wraps the title + icon in one link back to the homepage's open-jar
+   state - a flex column with the same gap #interventions-nav itself
+   uses, so the title-to-icon spacing stays identical to before it was
+   wrapped; the text/colour resets below stop the browser's default
+   link styling from changing how the title looks. */
+#interventions-jar-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--interventions-nav-gap);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+#interventions-heading {
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--interventions-heading-size);
+  color: #000000;
+}
+
+#interventions-icon {
+  display: block;
+  width: var(--interventions-icon-width);
+  height: auto; /* preserves the PNG's own aspect ratio */
+}
+
+#interventions-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--interventions-tab-gap);
+}
+
+/* Real <button> elements (see interventions.html), with every default
+   button style reset so they read as plain text - no box, underline,
+   border, or button background of any kind. */
+.interventions-tab {
+  display: block;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--interventions-tab-size);
+  white-space: nowrap; /* keeps each label on one line */
+  color: #bbbbbb; /* inactive - light gray */
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Only inactive tabs darken on hover - the active tab (already black)
+   is excluded so hovering it can't visually "undo" its active state. */
+.interventions-tab:hover:not([aria-selected="true"]) {
+  color: #777777;
+}
+
+.interventions-tab[aria-selected="true"] {
+  color: #000000;
+}
+
+.interventions-tab:focus-visible {
+  outline: 1px solid #000000;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------
+   CONTENT PANELS
+   Both intentionally empty for now (page shell only) - only the
+   "hidden" mechanics matter at this stage; content and its own layout
+   come in a later pass.
+   -------------------------------------------------------------------- */
+/* "!important" is deliberate, matching about.css's own identical rule
+   and identical reasoning: an ID selector on a panel could otherwise
+   beat a class+attribute selector's "display: none" while genuinely
+   hidden. */
+[hidden] {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------
+   TRY ONE - INSTRUCTION TAPE (first interaction: tap to peel)
+   Two states of the exact same tape drawing - "instruction-tape-intact
+   .png" and "instruction-tape-peeled.png" - share the identical canvas
+   size, and are drawn with the tape's own left, "stuck down" half at
+   the same place within that canvas. Both images are stacked on top of
+   each other at this ONE shared wrapper position/size (never given
+   separate sizes/positions of their own, and never centred
+   independently) - tapping/clicking only crossfades their opacity, the
+   same technique the homepage's own closed/open jar images already
+   use, so the left half never visibly moves or rescales; only the
+   right side changes, exactly like the right end of the tape lifting.
+   "--tape-peeled-offset-x/y" exist only as a small escape hatch, in
+   case the two source PNGs ever turn out not to be pixel-aligned after
+   all - both default to 0 (no nudge) and should stay that way unless a
+   visible seam ever shows up. "--tape-fade-duration" is set from
+   interventions.js (the source of truth for this timing, same
+   convention as script.js) - shown here as the default/reference
+   value. */
+:root {
+  --tape-fade-duration: 250ms;
+
+  --tape-width: clamp(320px, 62vw, 980px);
+  --tape-left: 50%;
+  --tape-top: 50%;
+
+  --tape-peeled-offset-x: 0px;
+  --tape-peeled-offset-y: 0px;
+
+  /* TASK TEXT - positioned from the tape wrapper's own centre, not its
+     full (mostly transparent) canvas edge: the peeled tape's actual
+     visible drawing only reaches about this far (--tape-text-left-
+     offset, a fraction of the wrapper's own width) past the wrapper's
+     left edge, short of its horizontal centre - see "#intervention-
+     task-text" below for the full calculation. Font size is a direct
+     reference to "--interventions-heading-size" (the "interventions"
+     heading and the nav tabs share this exact value on desktop/iPad/
+     landscape) rather than its own separate number, so it can't drift
+     out of sync with either one there. On iPhone portrait specifically,
+     where the heading and the tabs no longer share one value, the
+     phone-portrait block further down re-points this at
+     "--interventions-tab-size" instead - see its own comment there. */
+  --tape-text-left-offset: 0.19;
+  --tape-text-gap: clamp(28px, 4vw, 64px);
+  --tape-text-size: var(--interventions-heading-size);
+  --task-line-height: 1.5;
+
+  /* Only used for a task longer than 9 words (see "#intervention-
+     task-text.long-task" below, toggled by interventions.js) - sized
+     to wrap such a task into roughly two lines rather than one very
+     long one, while staying well clear of the right edge of the screen
+     at any normal desktop width. */
+  --tape-text-long-max-width: clamp(320px, 34vw, 560px);
+}
+
+#instruction-tape-wrapper {
+  position: fixed;
+  left: var(--tape-left);
+  top: var(--tape-top);
+  transform: translate(-50%, -50%);
+  width: var(--tape-width);
+  aspect-ratio: 6511 / 2341; /* matches both source PNGs' own canvas exactly */
+  z-index: 1; /* above the (currently empty) rest of #interventions-content, below the nav (10) and logo (20) */
+  cursor: pointer;
+}
+
+#instruction-tape-wrapper.peeled {
+  cursor: default;
+}
+
+.instruction-tape-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* the wrapper's own aspect-ratio above already matches, so this is a safety net, not the thing doing the real scaling */
+  pointer-events: none; /* #instruction-tape-wrapper itself is the click target, not either individual image */
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  transition: opacity var(--tape-fade-duration) ease-in-out;
+}
+
+#instruction-tape-intact {
+  opacity: 1;
+}
+
+#instruction-tape-peeled {
+  opacity: 0;
+  transform: translate(var(--tape-peeled-offset-x), var(--tape-peeled-offset-y));
+}
+
+#instruction-tape-wrapper.peeled #instruction-tape-intact {
+  opacity: 0;
+}
+
+#instruction-tape-wrapper.peeled #instruction-tape-peeled {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------
+   TASK TEXT - revealed whenever the tape is peeled open, to the right
+   of it and vertically centred on it (hidden again whenever the tape
+   is closed - see interventions.js for the open/closed cycle).
+   Positioned from the tape wrapper's own centre point ("--tape-left"/
+   "--tape-top"), not a separate anchor - "left" below starts from that
+   centre, moves back toward the wrapper's own left edge by
+   "--tape-text-left-offset" (a fraction of
+   the wrapper's width - see its own comment in the ":root" block
+   above) to land at approximately where the peeled tape's actual
+   visible drawing ends, then adds a plain gap. "top: 50%" alone is a
+   deliberate simplification: the peeled tape's own visible vertical
+   centre sits only a few px below the wrapper's true centre at any
+   normal tape width, close enough that matching the wrapper's centre
+   exactly reads as "vertically centred on the tape" without needing
+   its own separate calculation. */
+#intervention-task-text {
+  position: fixed;
+  left: calc(var(--tape-left) - var(--tape-text-left-offset) * var(--tape-width) + var(--tape-text-gap));
+  top: var(--tape-top);
+  transform: translateY(-50%);
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--tape-text-size);
+  line-height: var(--task-line-height);
+  color: #000000;
+  white-space: nowrap; /* one line on desktop, per the "TRY ONE" requirement */
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1; /* same layer as the tape - below the nav (10) and logo (20) */
+  transition: opacity var(--tape-fade-duration) ease-in-out;
+}
+
+#intervention-task-text.visible {
+  opacity: 1;
+}
+
+/* A task over 9 words (see interventions.js, which toggles this class
+   based on a plain word count whenever the text is set) wraps into a
+   left-aligned block instead of forcing one very long line - same
+   font/size/colour/line-height as the rule above, only the wrapping
+   behaviour changes. Re-asserted for iPhone portrait further down,
+   since that breakpoint already has its own, different wrapping
+   treatment that must stay exactly as it was. */
+#intervention-task-text.long-task {
+  white-space: normal;
+  text-align: left;
+  max-width: var(--tape-text-long-max-width);
+}
+
+/* ==========================================================================
+   THINGS SOMEONE DID - DESKTOP/MAC LANDSCAPE COLLAGE
+   Four Polaroid frames, positioned/sized to match the annotated Figma
+   reference as closely as possible - each "left"/"top"/"width" below is
+   that frame's own centre point and displayed width, as a percentage
+   of a 1728x1117 desktop reference viewport (this project's usual
+   reference size), grouped here so the whole composition can be nudged
+   as a set later if needed. Every frame is "position: fixed" (viewport-
+   anchored), the same convention every other piece on this page
+   already uses, and centred via "transform: translate(-50%,-50%)" on
+   its own centre point, matching the homepage's own jar/object
+   pattern. "height" is never set on the frame/tape/photo images - all
+   use their own natural aspect ratio (frame/tape via "width" + "height:
+   auto"; the photo via "object-fit", see ".did-polaroid-photo" below),
+   exactly like the logo/tape-dispenser images elsewhere. Exactly one
+   tape piece per frame, overlapping only its own top edge. A separate,
+   simplified stacked layout exists for iPhone portrait further down
+   this file. */
+:root {
+  /* This whole set was rescaled/repositioned as one unit (a uniform
+     shrink plus a shift right/down), worked out from a screenshot that
+     marked the exact allowed rectangle (left edge clear of the nav,
+     top edge below it, right/bottom edges the outer limits) against
+     this composition's own previous bounding box - not eyeballed
+     freely - so the varied sizes/scattered feel are unchanged, only
+     the whole group now sits with real clearance inside that
+     rectangle instead of the square and short frames landing right on
+     (or past) its edges. */
+  --did-square-width: clamp(235px, 18vw, 350px);
+  --did-square-left: 28%;
+  --did-square-top: 49%;
+
+  --did-landscape-width: clamp(340px, 27.5vw, 510px);
+  --did-landscape-left: 51%;
+  --did-landscape-top: 67%;
+
+  --did-tall-width: clamp(165px, 13.3vw, 250px);
+  --did-tall-left: 72%;
+  --did-tall-top: 48%;
+
+  --did-short-width: clamp(147px, 11.5vw, 220px);
+  --did-short-left: 88%;
+  --did-short-top: 61%;
+
+  /* Shared by all 4 tape pieces below - one size, one piece per frame. */
+  --did-tape-width: clamp(70px, 6.5vw, 110px);
+
+  /* SUBMIT CARD (the short portrait frame's text) - "--did-submit-
+     text-left" is a fixed inner margin (not centred - the text block's
+     left edge always sits here); "--did-submit-text-center-y" is the
+     vertical centre of the frame's own photo opening (the same window
+     ".did-tall-photo" above uses: roughly 5%/5.5%/90%/72.5%, so its
+     own vertical centre is 41.75%) - only the vertical axis is centred
+     (equal empty space above/below), the horizontal position stays
+     fixed. "--did-submit-text-max-width" is a safety cap, well inside
+     the opening, so the text block can never overlap the white
+     Polaroid border. */
+  --did-submit-text-left: 18%;
+  --did-submit-text-center-y: 41.75%;
+  --did-submit-text-max-width: 70%;
+  --did-submit-text-size: clamp(8px, 0.6vw, 10.5px);
+  --did-submit-line-gap: 0.85em;
+}
+
+.did-polaroid {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 1; /* same layer as the "try one" tape/task text - below the nav (10) and logo (20) */
+}
+
+.did-polaroid-frame {
+  position: relative; /* so "z-index" below actually applies, keeping this above ".did-polaroid-photo" (1) regardless of DOM order - masks a photo's "cover" box if it ever overshoots the window by a hair. Still below ".did-tape" (3), which is the true top layer - see its own comment. */
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.did-tape {
+  position: absolute;
+  z-index: 3; /* above ".did-polaroid-frame" (2) and ".did-polaroid-photo" (1) - without this, "z-index: auto" here would stack it BELOW the frame's explicit z-index instead of on top of it */
+  width: var(--did-tape-width);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* A photo shown inside a frame's own transparent "window" - sized/
+   positioned as a percentage of the frame's own box, slightly larger
+   than the window itself (see each "*-photo" rule below) so the photo
+   always reaches every inner edge with no thin gap, even accounting
+   for small measurement imprecision. "object-fit: cover" (not
+   "contain") is what actually guarantees that - it fills this exact
+   box with no letterboxing, at the cost of a small, generally
+   unnoticeable crop wherever the photo's own proportions don't
+   perfectly match the window's; "overflow: hidden" is a second,
+   belt-and-suspenders guarantee that nothing the photo renders can
+   ever bleed past this same box. */
+.did-polaroid-photo {
+  position: absolute;
+  z-index: 1; /* below ".did-polaroid-frame" (2) - see its own comment */
+  display: block;
+  object-fit: cover;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.did-square-photo {
+  left: 5.8%;
+  top: 6.5%;
+  width: 88.6%;
+  height: 73.6%;
+}
+
+/* Same "cover" approach as the square frame's photo above (inherited
+   from ".did-polaroid-photo" - no override needed here), sized a touch
+   larger than "polaroid-landscape.png"'s own window so the photo
+   reaches every inner edge with no gap, cropping only the small amount
+   "cover" needs wherever a photo's own proportions don't perfectly
+   match the window's - the frame's own higher stacking (see
+   ".did-polaroid-frame") keeps its border the visible top layer even
+   then. */
+.did-landscape-photo {
+  left: 5%;
+  top: 5.5%;
+  width: 91%;
+  height: 74.5%;
+}
+
+/* Same "cover" approach again (inherited from ".did-polaroid-photo"),
+   sized a touch larger than "polaroid-portrait-tall.png"'s own window
+   for the same reason as the landscape frame above. "height" is a
+   little taller than that first estimate - the box's own bottom edge
+   was landing just short of the window's true bottom edge, leaving a
+   thin gap there specifically; still well clear of the frame's own
+   thick bottom border below the window. */
+.did-tall-photo {
+  left: 5%;
+  top: 5.5%;
+  width: 90%;
+  height: 75%;
+}
+
+/* Exactly one tape piece per frame from here on, each sitting mainly
+   above its own frame (in the empty page space) with only a slight
+   overlap onto the frame's own outer top border - never reaching down
+   into the inner photo window, which stays completely clear - as if
+   pinning the frame to the page. Near-vertical throughout, with a
+   slightly different angle per frame rather than all four identical,
+   and no tape anywhere else (sides/bottom). */
+
+/* 1. SQUARE - upper-left, large, slightly above the landscape frame.
+   Clickable (see interventions.js): each tap cycles "#did-square-
+   photo" through the four "intervention-green-towel-*" images - the
+   frame itself never changes size or position. */
+.did-polaroid-square {
+  left: var(--did-square-left);
+  top: var(--did-square-top);
+  width: var(--did-square-width);
+  cursor: pointer;
+}
+
+.did-tape-square-1 {
+  top: -10%;
+  left: 47%;
+  transform: translate(-50%, -50%) rotate(-88deg);
+}
+
+/* 2. LANDSCAPE - centre-lower, the largest frame. Clickable (see
+   interventions.js): each tap moves "#did-landscape-photo" to the
+   next of nine images - the frame itself never changes size or
+   position. */
+.did-polaroid-landscape {
+  left: var(--did-landscape-left);
+  top: var(--did-landscape-top);
+  width: var(--did-landscape-width);
+  cursor: pointer;
+}
+
+.did-tape-landscape-1 {
+  top: -9%;
+  left: 48%;
+  transform: translate(-50%, -50%) rotate(-97deg);
+}
+
+/* 3. TALL PORTRAIT - right of the landscape frame, slightly higher.
+   Clickable (see interventions.js): each tap moves "#did-tall-photo"
+   to the next of six images - the frame itself never changes size or
+   position. */
+.did-polaroid-tall {
+  left: var(--did-tall-left);
+  top: var(--did-tall-top);
+  width: var(--did-tall-width);
+  cursor: pointer;
+}
+
+.did-tape-tall-1 {
+  top: -10%;
+  left: 52%;
+  transform: translate(-50%, -50%) rotate(-83deg);
+}
+
+/* 4. SHORT PORTRAIT - far right, lower than the tall portrait frame.
+   Not a gallery like the other three - a plain link ("<a>" in
+   interventions.html, so "display: block" + the text-decoration/colour
+   resets below are needed the same way "#interventions-logo-link"
+   elsewhere already resets its own default link styling) that opens
+   the Instagram account in a new tab. The whole frame, including the
+   text below, is the click target. */
+.did-polaroid-short {
+  left: var(--did-short-left);
+  top: var(--did-short-top);
+  width: var(--did-short-width);
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.did-tape-short-1 {
+  top: -12%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-93deg);
+}
+
+/* The submission card's own text - "left" is a fixed inner margin (NOT
+   centred), so the text block's left edge always sits at the same
+   place; only "top" + "transform: translateY(-50%)" centre it, on the
+   photo opening's own vertical centre point ("--did-submit-text-
+   center-y" above), giving equal empty space above and below the
+   block regardless of its own total height. The block sizes to its
+   own content (no fixed width/height, just a "max-width" safety cap),
+   and "text-align: left" (below) keeps the text itself left-aligned
+   within it - the whole group (including the underlined link) moves
+   together as one block. Sits below the frame in stacking order
+   (z-index: 1, same layer a gallery photo would use) so the frame's
+   own border (z-index: 2) stays the top layer and masks any accidental
+   overflow past "--did-submit-text-max-width". */
+.did-submit-text {
+  position: absolute;
+  left: var(--did-submit-text-left);
+  top: var(--did-submit-text-center-y);
+  transform: translateY(-50%);
+  max-width: var(--did-submit-text-max-width);
+  z-index: 1;
+  font-family: var(--font-main);
+  font-weight: 400;
+  font-size: var(--did-submit-text-size);
+  line-height: 1.5;
+  color: #000000;
+  text-align: left;
+}
+
+.did-submit-line,
+.did-submit-stanza {
+  margin: 0 0 var(--did-submit-line-gap) 0;
+}
+
+.did-submit-cta {
+  margin-bottom: 0;
+  text-decoration: underline; /* the only underlined line - ".did-polaroid-short" resets text-decoration to "none" for the whole link, this re-enables it just here */
+}
+
+/* --------------------------------------------------------------------
+   IPHONE PORTRAIT (page shell only, for now)
+   Normal document flow instead of the desktop's fixed/centred
+   layering: the header (nav + logo) stacks at the top of the page.
+   Nothing outside this query is affected - iPad portrait/landscape
+   and iPhone landscape all fall outside "max-width: 600px" and keep
+   using the desktop rules above exactly as they are, matching the
+   about page's own responsive structure.
+   -------------------------------------------------------------------- */
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  :root {
+    /* Smaller than the desktop/tablet defaults so the nav and logo
+       comfortably share one row on a phone-width screen - same values
+       as about.css's equivalent block. */
+    --interventions-nav-width: 190px;
+    --interventions-phone-header-margin-x: 20px;
+
+    --interventions-heading-size: clamp(17px, 4.3vw, 18px);
+    --interventions-icon-width: clamp(86px, 22vw, 96px);
+    --interventions-tab-size: clamp(15px, 3.9vw, 16px);
+    --interventions-nav-line-height: 1.65;
+
+    --logo-width: clamp(155px, 41vw, 175px);
+
+    --interventions-phone-edge-space: clamp(24px, 6vw, 32px);
+
+    /* Smaller than the desktop default, and centred - on a single
+       narrow column there's no header column beside it to stay clear
+       of horizontally, only the reflowed header (nav + logo) stacked
+       above (see "#interventions-nav"/"#interventions-logo-link"
+       below) - "top" here is picked to sit comfortably clear of that. */
+    --tape-width: clamp(220px, 78vw, 340px);
+    --tape-left: 50%;
+    --tape-top: 58%;
+
+    /* Overrides the ":root" default (which matches the "interventions"
+       heading) back down to match the "try one"/"things someone did"
+       nav labels instead - only the font size changes here, not the
+       text's position (still set by "#intervention-task-text" itself,
+       untouched). */
+    --tape-text-size: var(--interventions-tab-size);
+
+    /* Comfortable clearance between the text block's right edge and
+       the screen's own right edge - see "#intervention-task-text"
+       below, which uses this (together with "--tape-left"/"--tape-
+       text-left-offset"/"--tape-width"/"--tape-text-gap", all already
+       defined above) to work out how much room is actually left for
+       the text between the tape's own visible right edge and the
+       screen edge. */
+    --tape-text-phone-right-margin: clamp(20px, 6vw, 40px);
+  }
+
+  .interventions-tab {
+    line-height: var(--interventions-nav-line-height);
+  }
+
+  /* Position (left/top/transform) is intentionally NOT overridden here
+     - the base rule above already starts the text just past the
+     tape's own visible right edge, with "--tape-text-gap" of clearance
+     (the exact same formula, simply recalculated from this breakpoint's
+     own smaller "--tape-width"/"--tape-top"), so the text can never
+     overlap the tape here either. Only "max-width" is added: without
+     it, a wrapped task would use the desktop-sized "--tape-text-long-
+     max-width" instead (see ".long-task" below) and could run off the
+     right edge of a narrow phone. The calculation mirrors the base
+     "left" formula exactly, so the text's own right edge always lands
+     "--tape-text-phone-right-margin" before the screen's right edge:
+     100vw minus that same "left" - "50vw" standing in for the base
+     rule's "var(--tape-left)" (50%), since this element's containing
+     block for a fixed position is the viewport itself. Same mobile
+     Safari "font boosting" fix used throughout this file - the task
+     text sits in a different structural context here than the plain
+     nav tab labels it's meant to match exactly, which is enough for
+     that automatic heuristic to inflate it by a different amount even
+     though "--tape-text-size" above already points both at the exact
+     same value. */
+  #intervention-task-text {
+    white-space: normal;
+    text-align: left;
+    max-width: calc(50vw + var(--tape-text-left-offset) * var(--tape-width) - var(--tape-text-gap) - var(--tape-text-phone-right-margin));
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* The desktop ".long-task" rule (further up) also sets "max-width",
+     at higher specificity than the plain "#intervention-task-text"
+     rule just above - re-asserted here, at matching specificity, with
+     this breakpoint's own value from above, so a wrapped task on
+     iPhone portrait never uses the desktop-sized one instead. */
+  #intervention-task-text.long-task {
+    max-width: calc(50vw + var(--tape-text-left-offset) * var(--tape-width) - var(--tape-text-gap) - var(--tape-text-phone-right-margin));
+  }
+
+  /* "--interventions-heading-size"/"--interventions-tab-size" above
+     already exactly match about.css's own "--about-heading-size"/
+     "--about-tab-size" values for iPhone portrait - the mismatch isn't
+     an authored font-size difference. "#interventions-heading" is a
+     single, plain line of text, unlike "#about-heading" (wrapped in
+     two "display: block" spans there, forcing two lines) - that
+     structural difference is enough for mobile Safari's automatic
+     text-size-adjust ("font boosting") to inflate this heading (and
+     these tabs) by a different amount than the about page's, even
+     though the authored size is identical. Disabling that heuristic
+     here - not changing any authored size or line-height - is what
+     makes the rendered size actually match. */
+  #interventions-heading,
+  .interventions-tab {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* The header row: nav on the left, logo on the right, in normal flow
+     instead of fixed - matching the about page's own header row
+     exactly. "order" is what puts the nav first (left) and the logo
+     second (right) despite the logo coming first in the HTML. */
+  body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  #interventions-nav {
+    position: static;
+    order: 1;
+    width: var(--interventions-nav-width);
+    margin: var(--interventions-phone-edge-space) 0 0 var(--interventions-phone-header-margin-x);
+    padding-bottom: var(--interventions-phone-edge-space);
+  }
+
+  #interventions-logo-link {
+    position: static;
+    order: 2;
+    margin: var(--interventions-phone-edge-space) var(--interventions-phone-header-margin-x) 0 0;
+  }
+
+  #interventions-content {
+    order: 3;
+    flex: 1 0 100%;
+  }
+
+  /* --------------------------------------------------------------------
+     THINGS SOMEONE DID - IPHONE PORTRAIT (one scrolling column)
+     The desktop collage (see "THINGS SOMEONE DID - DESKTOP/MAC
+     LANDSCAPE COLLAGE" further up) scatters all four frames with
+     "position: fixed" at exact viewport points - fine for one fixed
+     desktop screen, but on a narrow phone that would either overlap
+     the reflowed header above or, worse, clip anything below the first
+     screenful with no way to scroll to it ("position: fixed" elements
+     never contribute to the page's own scrollable height). Every rule
+     below only changes HOW the four frames are laid out (flow instead
+     of fixed points, stacked instead of scattered) - none of it touches
+     the reflowed header/nav/logo above, and every individual tape piece
+     keeps the exact same rotation/relative position on its own frame
+     as the desktop version; only each frame's own width (and so the
+     whole thing's scale) is set smaller here, to fit a phone screen
+     with real side margins. */
+  :root {
+    --did-phone-frame-gap: clamp(56px, 15vw, 100px);
+    --did-phone-square-width: clamp(220px, 70vw, 300px);
+    --did-phone-landscape-width: clamp(260px, 82vw, 350px);
+    --did-phone-tall-width: clamp(140px, 44vw, 190px);
+    --did-phone-short-width: clamp(130px, 40vw, 175px);
+  }
+
+  #panel-did-someone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--did-phone-frame-gap);
+    padding: var(--did-phone-frame-gap) 24px;
+  }
+
+  .did-polaroid {
+    position: relative; /* was "fixed" on desktop - normal flow here, so the page can scroll to reveal every frame */
+    left: auto;
+    top: auto;
+    transform: none;
+  }
+
+  .did-polaroid-square {
+    width: var(--did-phone-square-width);
+  }
+
+  .did-polaroid-landscape {
+    width: var(--did-phone-landscape-width);
+  }
+
+  .did-polaroid-tall {
+    width: var(--did-phone-tall-width);
+  }
+
+  .did-polaroid-short {
+    width: var(--did-phone-short-width);
+  }
+
+  /* Each tape strip's "top" (desktop values further up this file) is a
+     PERCENTAGE of its own frame's height - at phone scale, that same
+     percentage leaves proportionally more empty space between the
+     tape's own lower edge and the frame's top border, reading as
+     "floating" rather than attached. Fixed px values here (not a
+     percentage) land each one's lower edge a small, consistent ~10px
+     into the frame's own top border regardless of frame size - capped
+     at 10px (the low end of the requested 10-15px) rather than more,
+     because the smallest frame's own photo/text window (the short
+     portrait frame, at its narrowest phone width) starts only about
+     11-12px inside its own top border - any more overlap risks the
+     tape reaching into it, which the "must not cover the inner photo/
+     text area" requirement rules out. "left" and each one's own
+     "rotate()" (still set by the desktop rule; only "top" is
+     overridden here) are untouched, so width/angle/horizontal
+     alignment all stay exactly as they were. Stacking (".did-tape"'s
+     own "z-index: 3", already higher than the frame's "z-index: 2")
+     is unscoped and already applies here with no change needed. */
+  .did-tape-square-1,
+  .did-tape-landscape-1,
+  .did-tape-tall-1,
+  .did-tape-short-1 {
+    top: -26px;
+  }
+}

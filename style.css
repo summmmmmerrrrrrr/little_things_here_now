@@ -1,0 +1,1567 @@
+/* ==========================================================================
+   OPENING SCENE - STYLES
+   Keep this page completely empty-looking: pure white, no decoration.
+   ========================================================================== */
+
+/* Editable sizes for the note paper (see script.js for the pigeon-catching
+   logic that reveals it). Desktop uses a target width capped by a maximum
+   pixel width; mobile uses its own target width via the media query below. */
+:root {
+  --note-paper-desktop-width: 60vw;
+  --note-paper-desktop-max-width: 480px;
+  --note-paper-mobile-width: 88vw;
+
+  /* The upper-right logo's margin from the edge (used as the "existing
+     responsive margin" side of "max(margin, env(safe-area-inset-*))" -
+     see "#opening-text" further down), and its displayed width. This
+     desktop value is the default; touch portrait and touch landscape
+     each override "--logo-width" inside their own existing media
+     queries further down, so there's one clearly labelled value per
+     mode. */
+  --logo-margin: 24px;
+  --logo-width: clamp(160px, 12vw, 230px);
+
+  /* The one place to change the whole website's font later.
+     Used across index.html, about.html and process.html (set once on
+     html/body as the base, plus explicitly on each piece of interface
+     text so it stays correct even if any of those move out of body's
+     inheritance chain later). Fragment Mono is loaded once per page via
+     the official Google Fonts <link> in each page's <head> - "monospace"
+     is just the fallback if that load is ever blocked/slow. */
+  --font-main: "Fragment Mono", monospace;
+
+  /* Wrestler entrance / arm-rotation / exit timing. script.js sets all
+     three of these to match its own "wrestlerEntranceDuration" /
+     "armRotationDuration" / "wrestlerExitDuration" variables at load
+     time - script.js is the source of truth; the values below are just
+     the defaults shown here for reference. */
+  --wrestler-entrance-duration: 1300ms;
+  --arm-rotation-duration: 2000ms;
+  --wrestler-exit-duration: 1200ms;
+
+  /* Wrestler size and position - controlled primarily by viewport height
+     so the character scales naturally with the screen. This desktop/
+     mouse default is matched to a 1728x1117 reference layout; touch
+     portrait and touch landscape each have their own values further
+     down (each with its own phone-vs-tablet split), since the target
+     proportions genuinely differ by device, not just by scaling.
+     --wrestler-bottom-offset is 0 everywhere - wrestler-body.png's own
+     artwork already ends exactly at its natural crop line (its own
+     canvas edge), so no extra cropping is needed; the visible height
+     is controlled entirely by --wrestler-height. */
+  --wrestler-height: 83vh;              /* the one main size control */
+  --wrestler-bottom-offset: 0;          /* how far below the viewport the wrestler is rooted */
+  --wrestler-horizontal-position: 8vw;  /* distance from the left edge */
+
+  /* Where the arm rotates from, as a % position within the wrestler's own
+     box. The body and arm images share the same canvas size, so one pair
+     of numbers lines up the rotation point with the armpit on both. */
+  --arm-pivot-x: 36%;
+  --arm-pivot-y: 62%;
+
+  /* ARMPIT TARGET - the exact spot on the wrestler's body that the hit
+     area and the arrow both aim at. A % of the wrestler's own box, so
+     it scales and moves together with it automatically.
+       - a SMALLER --armpit-x moves the target further LEFT
+       - a LARGER  --armpit-x moves the target further RIGHT
+       - a SMALLER --armpit-y moves the target further UP
+       - a LARGER  --armpit-y moves the target further DOWN
+     Currently set to the actual arm/torso crease per reference
+     screenshot. Edit these two freely - everything else (hit area,
+     arrow) follows automatically. */
+  --armpit-x: 29%;
+  --armpit-y: 66%;
+
+  /* Size of the invisible tickle hit area, centred on the target above -
+     kept a bit larger than the visible armpit so it's easy to hit. */
+  --armpit-hit-width: 20%;
+  --armpit-hit-height: 16%;
+
+  /* ARROW TAIL OFFSET - where the arrow's tail starts, as a px distance
+     added to the armpit target above (the arrowHEAD always stays right
+     on the target itself; script.js works out the arrow's length and
+     angle automatically from this offset - see positionWrestlerArrow()
+     in script.js).
+       - a MORE NEGATIVE --arrow-tail-offset-x moves the tail further LEFT
+       - a LARGER (more positive) --arrow-tail-offset-y moves the tail further DOWN */
+  --arrow-tail-offset-x: -80px;
+  --arrow-tail-offset-y: 45px;
+
+  /* The arrow's small repeating "this way" nudge, along the same
+     diagonal it points in. Only plays while it's visible - see
+     #wrestler-arrow.visible in the WRESTLER section below. */
+  --arrow-move-x: 5px;
+  --arrow-move-y: -3px;
+  --arrow-move-duration: 0.8s;
+
+  /* How far and how often the "ready" feather gently bobs up and down. */
+  --feather-float-amount: 5px;
+  --feather-float-duration: 1200ms;
+
+  /* The jar's idle float (before AND after it's opened), the short
+     "pop" and grow when it's clicked open, and the four objects' own
+     idle float and reveal-in transition. script.js is the source of
+     truth for these (its "jarFloatDistance" / "jarFloatDuration" /
+     "objectFloatDistance" / "objectRevealDuration" variables, plus two
+     small internal ones for the pop and the grow) - the values below
+     are just the defaults shown here for reference. */
+  --jar-float-distance: 7px;
+  --jar-float-duration: 2400ms;
+  --jar-open-pulse-duration: 240ms;
+  --jar-open-scale-duration: 400ms;
+  --object-float-distance: 7px;
+  --object-reveal-duration: 800ms;
+
+  /* THE CENTRED JAR + OBJECTS COMPOSITION (see #jar-scene further
+     down). These are the WIDE-SCREEN values, matched to the annotated
+     desktop reference screenshot - there's a second, genuinely
+     different (not just scaled-down) portrait set further down, in the
+     "max-width: 480px" media query, matched to the annotated mobile
+     reference screenshot. This is the one place to adjust how big
+     things are or how far apart they sit. */
+
+  /* The jar's two displayed diameters - closed, and open (roughly
+     double, so it reads as clearly bigger once opened; kept as two
+     independent clamp()s, rather than calc(var(--closed-jar-size) * 2),
+     so the open jar can be given extra headroom on narrow screens
+     where doubling the closed size would crowd out the four objects). */
+  --closed-jar-size: clamp(135px, 17vw, 230px);
+  --open-jar-size: clamp(220px, 32vw, 460px);
+
+  /* How far each object's centre sits from the jar's own centre,
+     horizontally and vertically - shared by all four, since only the
+     sign (see #jar-scene's four "-wrapper" rules) differs per corner.
+     Bigger = a more spread-out composition; smaller = tighter/closer
+     to the jar. Matched to the annotated desktop reference screenshot. */
+  --object-offset-x: clamp(250px, 25vw, 450px);
+  --object-offset-y: clamp(210px, 24vh, 310px);
+
+  /* The lower row's own vertical offset - defaults to matching
+     --object-offset-y exactly (so desktop/tablet is unaffected), but
+     gets pulled in separately on phone portrait (see the dedicated
+     media query near the bottom of this file) without touching the
+     upper row at all. */
+  --bottom-object-offset-y: var(--object-offset-y);
+
+  /* Every object's displayed size - one shared square target area for
+     all four (matched to the annotated reference screenshot), so each
+     is placed inside an equally-sized wrapper regardless of its own
+     image proportions; the image itself uses object-fit: contain
+     inside that square so nothing stretches or gets cropped. */
+  --nav-object-size: clamp(230px, 19vw, 380px);
+}
+
+/* Reset default spacing and stop any scrollbars from appearing */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;         /* no scrollbars, ever */
+  background-color: #FFFFFF; /* pure white background */
+  font-family: var(--font-main); /* base for anything that doesn't set its own - everything currently interactive already does, explicitly, below */
+  font-weight: 400;
+}
+
+/* Form controls don't inherit the page's font by default in most
+   browsers (they use the OS's own UI font instead) - this restores
+   that inheritance explicitly. Harmless even though this project has
+   no text inputs today: about.html's ".about-tab" buttons and any
+   future form elements are covered automatically, with no separate
+   rule needed per element. */
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-main);
+  font-weight: 400;
+}
+
+/* The pigeon image.
+   Position is "fixed" so we can place it anywhere on screen using
+   left/top in pixels, controlled entirely from script.js.
+   opacity starts at 0 so the raw image (at its full native size)
+   can never flash on screen before script.js has positioned it.
+   script.js sets this to 1 at the exact moment the flight begins. */
+#pigeon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;   /* script.js turns this on only while the pigeon is flying/catchable */
+  user-select: none;
+  -webkit-user-drag: none; /* stops Safari/Chrome's native image-drag ghost */
+  -webkit-touch-callout: none; /* stops iOS/iPadOS Safari's long-press "save image" menu from hijacking a press-and-hold */
+  touch-action: none;      /* lets dragging the pigeon work without scrolling the page on touch */
+  /* width is set in JS via the "pigeonSize" / "pigeonFrontSize" variables */
+}
+
+/* The feather image. Same idea as the pigeon: JS moves it around.
+   opacity starts at 0 for the same reason as #pigeon above -
+   it stays invisible until script.js reveals it at release time.
+   pointer-events stays "none" until script.js turns it on once the
+   feather has landed (see the WRESTLER section further down).
+   z-index: 100 keeps it above the wrestler's entire stacking context
+   (the wrestler container itself is z-index: 15) at all times,
+   including while it's being dragged over the armpit. */
+#feather {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none; /* stops Safari/Chrome's native image-drag ghost, once draggable */
+  -webkit-touch-callout: none; /* stops iOS/iPadOS Safari's long-press "save image" menu from hijacking the tickle drag */
+  touch-action: none;      /* lets dragging the feather work without scrolling the page on touch */
+  opacity: 0;
+  z-index: 100;
+}
+
+/* Added once the feather has landed and the wrestler has finished
+   rising: a gentle up/down bob that signals it can be picked up.
+   rotate() first re-applies the exact tilt the feather landed at
+   (set by script.js as --feather-landing-rotation), so floating
+   doesn't undo that natural-looking landing angle. */
+@keyframes feather-float {
+  0%, 100% {
+    transform: rotate(var(--feather-landing-rotation, 0deg)) translateY(0);
+  }
+  50% {
+    transform: rotate(var(--feather-landing-rotation, 0deg)) translateY(var(--feather-float-amount));
+  }
+}
+
+#feather.floating {
+  animation: feather-float var(--feather-float-duration) ease-in-out infinite;
+}
+
+/* The logo, fixed in the upper-right corner. It's a <button> element
+   (see index.html) so it can act as a click/tap/keyboard restart
+   control, but every default button style is reset below so only the
+   image itself shows - the button shrinks to exactly the image's own
+   size, so the clickable area matches the visible logo pixels rather
+   than some larger invisible header strip.
+   "top"/"right" use "max(margin, env(safe-area-inset-*))" so the logo
+   clears any device notch/rounded-corner/home-indicator area instead of
+   just a flat margin - falls back to the plain margin on browsers
+   without safe-area support, since env() then evaluates to nothing and
+   max() just uses the other side.
+   It starts invisible (opacity 0) and JS fades it in later by changing
+   this opacity to 1. The transition below is what makes that change
+   look like a smooth fade instead of a snap. */
+#opening-text {
+  position: fixed;
+  top: max(var(--logo-margin), env(safe-area-inset-top));
+  right: max(var(--logo-margin), env(safe-area-inset-right));
+  margin: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  z-index: 20; /* stays above the note paper (z-index: 10) and everything else */
+
+  /* Reset default <button> appearance so only the image shows */
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+
+  cursor: pointer; /* makes it clear on desktop that it can be clicked */
+}
+
+/* Sized from --logo-width; "height: auto" (plus never setting a fixed
+   height anywhere) is what preserves the PNG's own aspect ratio - nothing
+   here stretches, crops, or rotates it. "display: block" avoids the few
+   stray pixels of inline-image whitespace that would otherwise slightly
+   enlarge the button's (and so the clickable area's) own box. */
+#opening-logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto;
+}
+
+/* The tiny fallback message, only shown if the browser blocks
+   audio from playing automatically. Hidden by default. */
+#click-message {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: #999999;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+/* A class we add with JS to make the click-message visible */
+#click-message.visible {
+  opacity: 1;
+}
+
+/* The note paper, revealed after a successful 3-second catch, together
+   with the two lines of text layered on top of it (see #paper-text
+   below). The container is "display: inline-block" so it always
+   shrinks to exactly match the image's own rendered size - which
+   means the text inside, positioned relative to this container, moves
+   and scales together with the paper automatically at any screen size.
+   Centred in the viewport; z-index puts it above everything else. */
+#paper-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-block;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.1s linear; /* tiny, direct - not a polished unfolding animation */
+  pointer-events: none; /* only #paper-link below re-enables itself */
+
+  /* Base font size for the text on the paper - both lines below scale
+     from this with "em", so it grows/shrinks together with the paper. */
+  font-family: var(--font-main);
+  font-size: clamp(14px, 3.2vw, 20px);
+}
+
+#paper-container.visible {
+  opacity: 1;
+}
+
+/* The paper image itself. max-height keeps it fully visible even on
+   short screens (like a landscape phone). Sized from the custom
+   properties at the top of this file. */
+#note-paper {
+  display: block;
+  width: min(var(--note-paper-desktop-width), var(--note-paper-desktop-max-width));
+  max-height: 85vh;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Below ~700px wide (phones), use a larger relative size instead */
+@media (max-width: 700px) {
+  #note-paper {
+    width: var(--note-paper-mobile-width);
+  }
+}
+
+/* The two lines of text, centred inside the paper's own visible area.
+   note-paper.png has a transparent margin around the paper shape
+   itself, so a 68%-wide box keeps the text safely inside its edges
+   without touching them. */
+#paper-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68%;
+  text-align: center;
+  pointer-events: none; /* only #paper-link re-enables itself */
+}
+
+/* "oh, you caught it." - the main message */
+#paper-message {
+  margin: 0 0 0.6em 0;
+  font-size: 1em;
+  font-weight: normal;
+  color: #1a1a1a;
+}
+
+/* "yunshu qin's" / "thesis process document" - smaller, and the only
+   clickable part. Two lines (a literal "<br>" in index.html, not
+   wrapping) inside one "display: inline-block" link, so the whole
+   two-line block is a single click target; "text-align: center" keeps
+   the shorter first line centred over the longer second line, and
+   since the block itself has no fixed width, it stays exactly as wide
+   as its longest line and centred with it - both already sit inside
+   "#paper-text", which is itself centred on the paper at any screen
+   size (see above), so nothing about that centring needed to change. */
+#paper-link {
+  display: inline-block;
+  text-align: center;
+  font-size: 0.78em;
+  font-weight: normal;
+  color: #1a1a1a;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#paper-link:focus {
+  outline: 1px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   THE WRESTLER
+   Appears after the feather has landed and is clicked. The body and arm
+   share the exact same source-image canvas size, so overlaying them at
+   identical position/size keeps the arm's shoulder lined up with the
+   body's armpit automatically - only ONE pivot point (--arm-pivot-x/y)
+   is needed for both. See script.js "WRESTLER" section for the logic.
+   ========================================================================== */
+
+/* The container - shared by the body and arm (see below), so sizing
+   and positioning it here automatically keeps both in exact alignment;
+   neither is ever resized/repositioned on its own. height is the one
+   main size control (per the "control primarily by viewport height"
+   requirement); width follows from it automatically via aspect-ratio,
+   matching the shared image canvas (2780 x 4171).
+   Layout ("bottom"/"left"/"height", all responsive - see
+   --wrestler-height etc above and their touch-mode overrides further
+   down) and animation ("transform: translateY(...)", for the
+   entrance/exit slide only) are deliberately different properties, so
+   the entrance/exit animation below can never overwrite the responsive
+   position/size, or vice versa.
+   Starts translated fully below the viewport; the ".risen" class
+   (added by script.js) slides it up with a plain linear transition -
+   no easing, matching the "simple linear translation" requirement. */
+#wrestler {
+  position: fixed;
+  bottom: var(--wrestler-bottom-offset);
+  left: var(--wrestler-horizontal-position);
+  height: var(--wrestler-height);
+  aspect-ratio: 2780 / 4171;
+  transform: translateY(150%);
+  transition: transform var(--wrestler-entrance-duration) linear;
+  pointer-events: none; /* only #armpit-hit-area's overlap check reads its geometry; nothing here needs to be clickable */
+  z-index: 15; /* above the paper (10), below the title (20) */
+}
+
+#wrestler.risen {
+  transform: translateY(0);
+}
+
+/* Slides the wrestler back down and fully off-screen after the arm/jar
+   handoff (see startWrestlerExit() in script.js) - the same distance as
+   its initial hidden position above, so it's already proven to clear
+   every viewport size the entrance does. Placed after ".risen" so it
+   wins the (equal-specificity) cascade and overrides it, and uses its
+   own duration (--wrestler-exit-duration) rather than the entrance's. */
+#wrestler.exiting {
+  transition: transform var(--wrestler-exit-duration) linear;
+  transform: translateY(150%);
+}
+
+/* The body and arm both fill the container exactly, at the same size -
+   this is what keeps them aligned. Explicit z-index (below) controls
+   which paints in front, rather than relying on DOM order. */
+#wrestler-arm,
+#wrestler-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Explicit stacking order within the wrestler: body (10), arm (20).
+   The feather (z-index 100) and the arrow (z-index 200) both live
+   outside #wrestler, at the top level, so they always paint above the
+   entire wrestler regardless of this internal order - see #feather
+   and #wrestler-arrow for why. */
+#wrestler-body {
+  z-index: 10;
+}
+
+#wrestler-arm {
+  z-index: 20;
+}
+
+/* The body never moves on its own - only the "shaking" class (added
+   during valid tickling) nudges it, in small mechanical steps. */
+@keyframes wrestler-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-2px); }
+  50%      { transform: translateX(2px); }
+  75%      { transform: translateX(-1px); }
+}
+
+#wrestler-body.shaking {
+  animation: wrestler-shake 0.15s steps(2, end) infinite;
+}
+
+/* The arm rotates around the shared pivot point. At rest (no "rotating"
+   class) it sits at rotate(0deg), which - because of how the source
+   image itself is drawn (hand near the top of its own canvas) - already
+   shows it vertically above the wrestler's head with no rotation needed.
+   The ".rotating" class (added once, after a successful tickle) turns
+   this into one full linear-speed revolution; because 360deg looks
+   identical to 0deg, the arm can simply stay in this class afterwards
+   without needing to be removed or snapped back. */
+#wrestler-arm {
+  transform-origin: var(--arm-pivot-x) var(--arm-pivot-y);
+  transform: rotate(0deg);
+}
+
+#wrestler-arm.rotating {
+  transition: transform var(--arm-rotation-duration) linear;
+  transform: rotate(-360deg);
+}
+
+/* Invisible hit area used only for the tickle overlap check in
+   script.js (getBoundingClientRect) - never shown, never itself
+   clickable. Sized/positioned as a % of the wrestler's own box, so it
+   scales and moves together with the character automatically. */
+#armpit-hit-area {
+  position: absolute;
+  left: var(--armpit-x);
+  top: var(--armpit-y);
+  width: var(--armpit-hit-width);
+  height: var(--armpit-hit-height);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* The plain instruction arrow pointing at the armpit. It's a top-level
+   element (see index.html) so it sits OUTSIDE #wrestler's stacking
+   context and its z-index can genuinely place it above the body, the
+   arm, and the feather. "left"/"top"/"width"/"transform" are left
+   unset here - script.js calculates all of them every time the arrow
+   is shown, from #armpit-hit-area's own live position
+   (getBoundingClientRect) plus the tail offset it should point from,
+   so the target coordinates are never duplicated, only read from that
+   existing box. transform-origin: 100% 50% keeps the bar's tip pinned
+   to that exact point no matter its length or angle. Hidden until the
+   feather is "ready" and hidden again immediately once dragging
+   starts or the tickle succeeds. */
+#wrestler-arrow {
+  position: fixed;
+  height: 2px;
+  transform-origin: 100% 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200; /* above the body (10), arm (20), and feather (100) */
+}
+
+/* The inner element carries the visible bar, the arrowhead, and the
+   small animated nudge - kept separate from #wrestler-arrow above so
+   the animation's "transform: translate(...)" never overwrites the
+   wrapper's positioning "transform: rotate(...)". */
+#wrestler-arrow-inner {
+  position: absolute;
+  inset: 0;
+  background-color: #000000;
+}
+
+#wrestler-arrow-inner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 9px;
+  border-color: transparent transparent transparent #000000;
+  transform: translateY(-50%);
+}
+
+#wrestler-arrow.visible {
+  opacity: 1;
+}
+
+/* Small repeating nudge along the arrow's own diagonal, to draw the
+   eye toward the armpit. Runs only while ".visible" is present, and
+   restarts cleanly each time the class is re-added (e.g. the feather
+   is dropped before a successful tickle). */
+#wrestler-arrow.visible #wrestler-arrow-inner {
+  animation: wrestler-arrow-point var(--arrow-move-duration) ease-in-out infinite;
+}
+
+@keyframes wrestler-arrow-point {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(var(--arrow-move-x), var(--arrow-move-y));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #wrestler-arrow.visible #wrestler-arrow-inner {
+    animation: none;
+  }
+}
+
+/* The jar, once "handed off" from the rotating arm to become its own
+   element (see startWrestlerExit() in script.js). A top-level element
+   for the same reason as the arrow above: OUTSIDE #wrestler's own
+   stacking context, so it can stay perfectly still (its own fixed
+   position) while #wrestler slides away underneath it, with a z-index
+   that genuinely places it above the arm. "left"/"top" default to 0
+   and "width"/"height" to 0 - script.js overwrites all four with the
+   arm image's own rendered bounding rectangle at the moment of
+   handoff, so the jar lines up exactly with no separate coordinates to
+   keep in sync; the zero defaults just keep it a harmless, invisible
+   0x0 box (instead of the source image's full natural size) until then. */
+#wrestler-jar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 150; /* above the body (10) and arm (20) inside #wrestler (itself z-index 15) */
+}
+
+#wrestler-jar.visible {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   THE CENTRED JAR + OBJECTS COMPOSITION
+   Everything below lives inside #jar-scene, a single fixed point at the
+   exact centre of the viewport - the shared reference every element
+   here positions itself against, instead of each being placed
+   relative to the raw viewport edges independently. See script.js
+   "STEP 8: THE JAR OPENS" for how it's driven.
+   ========================================================================== */
+#jar-scene {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 150; /* above the whole wrestler scene (15) and the feather (100) */
+}
+
+/* The jar's fixed-size box. Always centred on #jar-scene's own point
+   via "left/top: 50%" + the permanent "translate(-50%, -50%)" below -
+   script.js only ever adds an EXTRA translate/scale transform on top of
+   this (temporarily, for the one-time move-in-from-the-wrestler
+   animation - see startJarCloseup()), it never touches left/top
+   directly. That keeps this element's centre a single fixed fact,
+   whatever its width/height are doing - so growing from
+   --closed-jar-size to --open-jar-size (".open" below) via a plain
+   width/height transition grows it symmetrically outward from that
+   same fixed centre, with no extra transform needed for the resize
+   itself. Safe for #jar-visual inside to animate independently too,
+   without ever fighting over any of this. */
+#jar-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--closed-jar-size);
+  height: var(--closed-jar-size);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+#jar-wrapper.visible {
+  opacity: 1;
+}
+
+/* Added once (and never removed) at the moment the jar opens - grows
+   it to its larger, permanent open size. Only "width"/"height"
+   transition; "left"/"top"/the base "transform" above are untouched,
+   so the growth stays centred on the exact same point throughout. */
+#jar-wrapper.open {
+  width: var(--open-jar-size);
+  height: var(--open-jar-size);
+  transition: width var(--jar-open-scale-duration) ease-in-out, height var(--jar-open-scale-duration) ease-in-out;
+}
+
+/* Carries the floating idle bob and the click-to-open pop - kept on
+   this inner element (rather than #jar-wrapper itself) so those
+   animations' "transform" values never overwrite the centring
+   transform above. */
+#jar-visual {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* A simple from/to "alternate" bob (rather than feather-float's smooth
+   3-step version) reads as a little more mechanical, matching a jar
+   rather than a feather. Also the cue that it's clickable. */
+@keyframes jar-float {
+  from { transform: translateY(0); }
+  to   { transform: translateY(var(--jar-float-distance)); }
+}
+
+#jar-visual.floating {
+  animation: jar-float var(--jar-float-duration) ease-in-out infinite alternate;
+  cursor: pointer;
+  pointer-events: auto; /* the base rule sets "none" so it never blocks anything before/between being genuinely interactive */
+}
+
+/* A short, direct "pop" (no cinematic fade/glow) that plays once when
+   the jar is clicked - script.js swaps which of the two images below
+   is visible partway through it. Not infinite, so it simply finishes
+   and stays put. */
+@keyframes jar-open-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+#jar-visual.opening {
+  animation: jar-open-pulse var(--jar-open-pulse-duration) ease-in-out;
+}
+
+/* Both jar images fill #jar-visual completely - "object-fit: contain"
+   means the displayed size/centre come purely from this box, never
+   from either PNG's own natural dimensions, so swapping which one is
+   visible can never change the jar's apparent size or shift it. Only
+   one is shown (opacity) at a time. */
+#jar-closed,
+#jar-open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+#jar-open {
+  opacity: 0;
+}
+
+/* The four objects. THREE nested levels:
+   1. ".jar-object-wrapper" - a FIXED-size square (--nav-object-size,
+      shared by all four) at a FIXED quadrant position relative to the
+      jar's own centre (never touched by script.js or any animation -
+      see the four id rules below). This stays the actual click target
+      (see FUTURE CLICK BEHAVIOUR in script.js's comments).
+   2. ".jar-object-inner" - fills that square exactly, and carries the
+      "grow out of the jar" reveal and, afterwards, the idle float (see
+      the four "*-inner" id rules below). Everything inside it moves
+      together as one unit, since nothing below it has any animation of
+      its own.
+   3. The image (object-fit: contain, so nothing stretches or crops)
+      plus its touch-only label (.jar-object-label, further down).
+   Splitting position (level 1) from reveal/float (level 2) is what
+   lets those animations run without ever overwriting the quadrant
+   layout position. */
+.jar-object-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--nav-object-size);
+  height: var(--nav-object-size);
+  z-index: 1; /* above #jar-wrapper (which has no explicit z-index, so defaults below this) */
+}
+
+#fortune-teller-wrapper { transform: translate(-50%, -50%) translate(calc(-1 * var(--object-offset-x)), calc(-1 * var(--object-offset-y))); } /* upper-left */
+#tape-dispenser-wrapper { transform: translate(-50%, -50%) translate(var(--object-offset-x), calc(-1 * var(--object-offset-y))); } /* upper-right */
+#bag-wrapper             { transform: translate(-50%, -50%) translate(calc(-1 * var(--object-offset-x)), var(--bottom-object-offset-y)); } /* lower-left */
+#portal-hand-wrapper     { transform: translate(-50%, -50%) translate(var(--object-offset-x), var(--bottom-object-offset-y)); } /* lower-right */
+
+/* Fills the outer wrapper's square exactly; pointer-events stays
+   "none" so clicks/hovers pass straight through to the image inside -
+   the outer wrapper (above) is the thing that's actually interactive. */
+.jar-object-inner {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Each one's OWN starting transform is the exact opposite of its outer
+   wrapper's offset (above) plus scale(0.25) - since the wrapper already
+   applies its quadrant offset, this cancels out to translate(0, 0) in
+   absolute terms, i.e. right at the jar's centre. */
+#fortune-teller-inner { transform: translate(var(--object-offset-x), var(--object-offset-y)) scale(0.25); }
+#tape-dispenser-inner { transform: translate(calc(-1 * var(--object-offset-x)), var(--object-offset-y)) scale(0.25); }
+#bag-inner             { transform: translate(var(--object-offset-x), calc(-1 * var(--bottom-object-offset-y))) scale(0.25); }
+#portal-hand-inner     { transform: translate(calc(-1 * var(--object-offset-x)), calc(-1 * var(--bottom-object-offset-y))) scale(0.25); }
+
+.jar-object {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+/* ONE shared class on the parent (#jar-scene), added once by
+   script.js inside a single requestAnimationFrame - see revealObjects()
+   - transitions every ".jar-object-inner" back to translate(0, 0)
+   scale(1) (i.e. simply undoing each one's own starting offset above,
+   taking the image and label with it) at the same instant, with the
+   same duration. No per-object class, delay, or timing of any kind -
+   this is the only thing that starts the reveal. */
+#jar-scene.revealed .jar-object-inner {
+  transition: transform var(--object-reveal-duration) ease-in-out;
+  transform: translate(0, 0) scale(1);
+}
+
+#jar-scene.revealed .jar-object {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Desktop mouse only: an object becoming clickable/hoverable the
+   instant it's merely visible (the general rule above) means it can
+   pass right under a stationary cursor mid-flight and prematurely
+   trigger the cursor-following tooltip - not a problem on touch (no
+   cursor to pass under), so this narrows the general rule's
+   "pointer-events: auto" back to "none" until ".settled" (added by
+   script.js once the shared reveal duration has fully elapsed - see
+   revealObjects()) confirms every object has actually arrived. Same
+   specificity as the general rule above, so source order is what makes
+   this win for fine-pointer/hover devices specifically. */
+@media (hover: hover) and (pointer: fine) {
+  #jar-scene.revealed .jar-object {
+    pointer-events: none;
+  }
+
+  #jar-scene.settled .jar-object {
+    pointer-events: auto;
+  }
+}
+
+/* Only once every object has actually finished arriving does script.js
+   add ".settled" (also on #jar-scene, also once, after
+   "objectRevealDuration" has fully elapsed) - which is what unlocks
+   each object's own idle float below, applied to the SAME inner
+   element as the reveal above (rather than to the image directly), so
+   the image and its touch label keep moving together as one unit -
+   there is no separate floating animation on the text. Until
+   ".settled", nothing floats - the reveal above is the only thing
+   moving them. A different DURATION per object (no delay) is enough
+   that four identical loops starting together still visibly drift out
+   of sync within a cycle or two, without reintroducing any kind of
+   stagger into the reveal itself. */
+@keyframes object-float {
+  from { transform: translateY(0); }
+  to   { transform: translateY(var(--object-float-distance)); }
+}
+
+#jar-scene.settled #fortune-teller-inner { animation: object-float 2600ms ease-in-out infinite alternate; }
+#jar-scene.settled #tape-dispenser-inner { animation: object-float 2900ms ease-in-out infinite alternate; }
+#jar-scene.settled #bag-inner             { animation: object-float 3200ms ease-in-out infinite alternate; }
+#jar-scene.settled #portal-hand-inner     { animation: object-float 3500ms ease-in-out infinite alternate; }
+
+/* The touch-only persistent name label, directly underneath each
+   object, centred, floating together with it (see ".jar-object-inner"
+   above). Hidden entirely on devices with a real hover/mouse - see the
+   "(hover: none), (pointer: coarse)" block below, which is the only
+   place it's actually shown. */
+.jar-object-label {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  /* On touch devices, the cursor-following tooltip makes no sense (no
+     cursor) - hide it completely and rely only on these persistent
+     labels instead. */
+  #object-tooltip {
+    display: none;
+  }
+
+  .jar-object-label {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    max-width: var(--nav-object-size); /* stays within its own object's footprint, clear of neighbouring labels */
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: clamp(11px, 3vw, 15px);
+    line-height: 1.15;
+    text-align: center;
+    color: #000000;
+    opacity: 0; /* stays hidden until the fly-out has fully finished */
+    pointer-events: none;
+  }
+
+  /* Same ".settled" signal that unlocks the idle float above - the
+     label only appears once every object has actually arrived, and
+     then stays visible for as long as the composition is on screen. */
+  #jar-scene.settled .jar-object-label {
+    opacity: 1;
+  }
+}
+
+/* The one shared tooltip for all four objects (see script.js). Plain
+   on purpose - no background/border/radius/shadow/icon, and no
+   transition, so showing and hiding are both instant, never a fade.
+   script.js sets "left"/"top" directly (in px, following the cursor or
+   placed near a tapped object) and keeps it inside the viewport, so
+   "left"/"top" here are just harmless starting defaults. */
+#object-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  color: #000000;
+  font-family: var(--font-main);
+  font-weight: normal;
+  font-size: clamp(14px, 1.1vw, 20px);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 210; /* above every image, including the arrow (200) */
+}
+
+#object-tooltip.visible {
+  opacity: 1;
+}
+
+/* On narrow screens, keep the wrestler a little smaller and closer to
+   the edge so it stays clear of the feather's usual landing area and
+   never needs to crop or overlap other content. */
+@media (max-width: 480px) {
+  #wrestler {
+    --wrestler-height: 52vh;
+    --wrestler-horizontal-position: 4vw;
+  }
+
+  /* A shorter arrow tail to match the smaller wrestler above, a
+     smaller CLOSED jar so it doesn't dominate the screen before it's
+     even opened, and a genuinely different (not just scaled-down)
+     portrait layout for the four objects, matched to the annotated
+     mobile reference screenshot - set on :root (rather than #wrestler)
+     because the arrow and #jar-scene both live outside #wrestler - see
+     #wrestler-arrow and #jar-scene further up. */
+  :root {
+    --arrow-tail-offset-x: -48px;
+    --arrow-tail-offset-y: 43px;
+
+    --closed-jar-size: clamp(110px, 17vw, 230px);
+
+    --nav-object-size: clamp(125px, 35vw, 285px);
+    --object-offset-x: clamp(85px, 25vw, 205px);
+    --object-offset-y: clamp(205px, 24vh, 340px);
+  }
+}
+
+/* Touch devices held in PORTRAIT only (this covers phone AND iPad
+   portrait alike - deliberately no "max-width", since width alone
+   can't tell a portrait iPad apart from a landscape one). Landscape
+   touch is untouched by this block, and keeps the general touch rules
+   above as-is (same object positions as desktop) - matched to an
+   annotated portrait reference layout. Replaces the desktop's
+   symmetric four-corner composition with an asymmetric semicircle
+   around the jar, which now also moves to the left half of the screen
+   instead of the centre. */
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  /* Portrait-only sizes, referenced by the position rules further
+     down. clamp()'s max keeps every image comfortably sized rather
+     than oversized on the bigger iPad portrait screen. */
+  :root {
+    /* Tablet portrait default (matched to a 1024x1366 reference
+       layout) - the "max-width: 600px" block further down overrides
+       both of these again for phone portrait specifically, since the
+       target proportions genuinely differ by device, not just scale.
+       Bounds are generous safety rails, not meant to bind normally. */
+    --wrestler-height: clamp(300px, 68.5vh, 1100px);
+    --wrestler-horizontal-position: 4vw;
+
+    --logo-width: clamp(155px, 43vw, 300px);
+
+    --portrait-closed-jar-size: clamp(125px, 29vw, 245px);
+    --portrait-open-jar-size: clamp(190px, 39vw, 345px);
+    --portrait-fortune-teller-size: clamp(110px, 30vw, 260px);
+    --portrait-bag-size: clamp(100px, 28vw, 240px);
+    --portrait-tape-dispenser-size: clamp(105px, 29vw, 250px);
+    --portrait-portal-hand-size: clamp(130px, 37vw, 320px);
+
+    /* The one shared jar-centre point - both the closed and open jar
+       (see "#jar-wrapper" below, which never moves between the two
+       states, only resizes) use exactly this, so they can never end up
+       with different centres. Matched in script.js as
+       "portraitJarXFraction"/"portraitJarYFraction". */
+    --portrait-jar-x: 31%;
+    --portrait-jar-y: 48%;
+  }
+
+  /* Same fix as "html.tablet-landscape" further down this file - a raw
+     "--wrestler-height: 68.5dvh" declared unconditionally right after
+     the "vh" one above always wins the CUSTOM PROPERTY cascade (custom
+     properties don't validate their contents at declaration time),
+     even on a browser that can't actually use "dvh" for the real
+     "height" property. When that substitution then fails at USE time,
+     "height" doesn't fall back to the "vh" line - it collapses to its
+     own initial value, "auto", and an empty position:fixed box with no
+     other sizing hint (see "#wrestler" further up) ends up 0x0. That
+     matches exactly what iPad landscape testing proved was happening
+     there, and the wrestler here is the same element, using the same
+     "--wrestler-height" property - so if that same bug is why a
+     feather tap on iPad portrait "does nothing" (the tap itself still
+     working, but the wrestler it's supposed to reveal never actually
+     becoming visible), this is the fix, isolated to tablet portrait
+     only. "@supports" checks feature support BEFORE the cascade
+     considers the rule at all, so on a browser that can't use "dvh"
+     this whole block is skipped outright and the plain "vh" line above
+     is the only one that ever wins - no collapse is possible either way. */
+  @supports (height: 1dvh) {
+    :root {
+      --wrestler-height: clamp(300px, 68.5dvh, 1100px);
+    }
+  }
+
+  /* 1. "click anywhere to begin" - small enough to stay on one line,
+     still centred the same way it always was. */
+  #click-message {
+    font-size: clamp(11px, 3.4vw, 14px);
+    white-space: nowrap;
+    width: max-content;
+    left: 50%;
+    transform: translateX(-50%); /* re-stated so the centring can't end up overwritten by anything added here later */
+  }
+
+  /* 2. The title - stays on one line, well clear of the paper fortune
+     teller above the jar (see "#fortune-teller-wrapper" further down -
+     it starts at 18% from the top, far below the title's own 24px),
+     without touching its "top"/"left" (those are set directly on the
+     element by script.js, so a plain CSS rule couldn't move them even
+     if it tried). */
+  #opening-text {
+    font-size: clamp(11px, 3.3vw, 14px);
+    white-space: nowrap;
+    width: max-content;
+    max-width: 50vw;
+  }
+
+  /* 3. THE JAR moves to the left half of the screen instead of the
+     centre - "left"/"top" here are "--portrait-jar-x/y" (above), the
+     same percentages script.js uses for the one-time move-in
+     animation's target ("portraitJarXFraction"/"portraitJarYFraction"
+     in startJarCloseup()), so where it visibly lands and where it
+     rests afterwards always agree. Only "left"/"top"/size change - the
+     base rule's own "transform: translate(-50%, -50%)" (its permanent
+     centring) is untouched, so it still grows outward from this fixed
+     point exactly the same way it always grew from the screen's
+     centre - and since ".open" below only ever touches width/height,
+     never left/top, the closed and open jar always share this exact
+     same centre too. */
+  #jar-wrapper {
+    left: var(--portrait-jar-x);
+    top: var(--portrait-jar-y);
+    width: var(--portrait-closed-jar-size);
+    height: var(--portrait-closed-jar-size);
+  }
+
+  #jar-wrapper.open {
+    width: var(--portrait-open-jar-size);
+    height: var(--portrait-open-jar-size);
+  }
+
+  /* 4. THE FOUR OBJECTS - a loose semicircle around the jar (starting
+     above it, passing its right side, ending below it), each
+     positioned directly as its own point on screen instead of the
+     desktop's shared "offset from the jar" pair - see the outer
+     ".jar-object-wrapper" rule further up for why "left/top: 50%" is
+     the default being overridden here. Percentages (not px) are what
+     let the same four rules read correctly as "the same composition"
+     on both a narrow phone and a wider, more square iPad portrait
+     screen. */
+  #fortune-teller-wrapper {
+    left: 44%;
+    top: 18%;
+    width: var(--portrait-fortune-teller-size);
+    height: var(--portrait-fortune-teller-size);
+    transform: translate(-50%, -50%);
+  }
+
+  #bag-wrapper {
+    left: 74%;
+    top: 38%;
+    width: var(--portrait-bag-size);
+    height: var(--portrait-bag-size);
+    transform: translate(-50%, -50%);
+  }
+
+  #tape-dispenser-wrapper {
+    left: 73%;
+    top: 64%;
+    width: var(--portrait-tape-dispenser-size);
+    height: var(--portrait-tape-dispenser-size);
+    transform: translate(-50%, -50%);
+  }
+
+  #portal-hand-wrapper {
+    left: 39%;
+    top: 83%;
+    width: var(--portrait-portal-hand-size);
+    height: var(--portrait-portal-hand-size);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Each one's OWN starting transform (used only for the reveal - see
+     "#jar-scene.revealed .jar-object-inner" further up, which is
+     completely unchanged and still just transitions every one of
+     these back to "translate(0, 0) scale(1)") now points back at the
+     jar's OWN position (--portrait-jar-x/y, 31%/48%) instead of undoing
+     a shared offset. "vw"/"vh" - not "%" - are what make this correct:
+     unlike "%" (which transform reads relative to the ELEMENT'S OWN
+     size), "vw"/"vh" are real viewport-relative lengths, so "(jar's % -
+     this object's %) * viewport size" can be written directly. Each
+     value below is just that subtraction done once: e.g. the fortune
+     teller is at (44%, 18%), so it starts translated by (31 - 44)vw,
+     (48 - 18)vh. */
+  #fortune-teller-inner { transform: translate(-13vw, 30vh) scale(0.25); }
+  #bag-inner             { transform: translate(-43vw, 10vh) scale(0.25); }
+  #tape-dispenser-inner { transform: translate(-42vw, -16vh) scale(0.25); }
+  #portal-hand-inner     { transform: translate(-8vw, -35vh) scale(0.25); }
+
+  /* 5. Every label fits on one line, however long - the general touch
+     rule above still supplies its position/colour/etc.; this only
+     overrides the wrapping behaviour and font size for the new,
+     larger portrait images. */
+  .jar-object-label {
+    white-space: nowrap;
+    width: max-content;
+    max-width: none;
+    line-height: 1;
+    font-size: clamp(9px, 2.4vw, 16px);
+  }
+}
+
+/* Phone portrait specifically (distinguished from tablet portrait
+   above by width, matching this project's existing narrow-screen
+   convention) - the wrestler is smaller and sits lower than on tablet,
+   matched to a 402x874 reference layout. Only the wrestler changes
+   here; every other touch-portrait rule above already applies equally
+   to phone and tablet. */
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  :root {
+    --wrestler-height: clamp(280px, 54vh, 700px);
+    --wrestler-height: clamp(280px, 54dvh, 700px);
+    --wrestler-horizontal-position: 3vw;
+  }
+
+  /* Same mobile Safari "font boosting" issue this project has hit
+     repeatedly elsewhere (see about.css/interventions.css's own
+     identical fixes): the browser's automatic text-size-adjust
+     heuristic can lock in a different boost amount for this exact same
+     text depending on how the page arrived at this state (the genuine
+     first-time reveal, several seconds into the opening sequence, vs
+     landing here immediately on return from another page) - not an
+     authored font-size difference. Disabling that heuristic, not
+     changing any authored size, is what keeps all four labels
+     identical either way. */
+  .jar-object-label {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* Touch devices held in LANDSCAPE - keeps the desktop's symmetric
+   four-corner relationship (jar centred, one object per corner) but
+   recalculates everything from viewport HEIGHT instead of width, since
+   a phone in landscape is wide but very short. A dedicated "safe area"
+   is reserved at the top for the title, and the whole composition is
+   then centred in the remaining usable height below it, rather than at
+   50% of the full viewport. Each variable is declared twice - once in
+   "vh", once in "dvh" - so browsers without "dvh" support simply keep
+   the "vh" value (the later, unsupported "dvh" declaration is ignored
+   outright), while browsers that DO support it get the more accurate
+   "dvh" (which - unlike "vh" - already excludes any mobile browser
+   chrome, so it doesn't need a separate fallback calculation). */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  :root {
+    /* Tablet landscape default (matched to a 1366x1024 reference
+       layout) - the "max-height: 600px" block further down overrides
+       both of these again for phone landscape, distinguished by
+       viewport HEIGHT (not width) since that's the dimension that's
+       actually short on a phone turned sideways. Bounds are generous
+       safety rails, not meant to bind normally. */
+    --wrestler-height: clamp(280px, 94vh, 1100px);
+    --wrestler-height: clamp(280px, 94dvh, 1100px);
+    --wrestler-horizontal-position: 6vw;
+
+    --logo-width: clamp(100px, 15vw, 145px);
+
+    --touch-landscape-object-size: clamp(70px, 27vh, 220px);
+    --touch-landscape-object-size: clamp(70px, 27dvh, 220px);
+    --touch-landscape-open-jar-size: clamp(100px, 43vh, 300px);
+    --touch-landscape-open-jar-size: clamp(100px, 43dvh, 300px);
+    --touch-landscape-closed-jar-size: clamp(65px, 26vh, 180px); /* keeps roughly the same closed:open ratio as everywhere else */
+    --touch-landscape-closed-jar-size: clamp(65px, 26dvh, 180px);
+    --touch-landscape-offset-x: clamp(130px, 23vw, 390px);
+    --touch-landscape-offset-y: clamp(65px, 21vh, 155px);
+    --touch-landscape-offset-y: clamp(65px, 21dvh, 155px);
+    --touch-landscape-label-size: clamp(8px, 2.2vh, 13px);
+    --touch-landscape-label-size: clamp(8px, 2.2dvh, 13px);
+    --touch-landscape-title-safe-area: clamp(48px, 13vh, 76px);
+    --touch-landscape-title-safe-area: clamp(48px, 13dvh, 76px);
+
+    /* Redirects the SAME shared variables the desktop four-corner
+       formulas already use (see the wrapper/inner id rules further up,
+       none of which need to change) to the height-based ones above -
+       so the existing symmetric layout math just runs with different
+       numbers, rather than needing its own copy. */
+    --nav-object-size: var(--touch-landscape-object-size);
+    --closed-jar-size: var(--touch-landscape-closed-jar-size);
+    --open-jar-size: var(--touch-landscape-open-jar-size);
+    --object-offset-x: var(--touch-landscape-offset-x);
+    --object-offset-y: var(--touch-landscape-offset-y);
+    --bottom-object-offset-y: var(--touch-landscape-offset-y);
+  }
+
+  /* #jar-wrapper and every ".jar-object-wrapper" share the same
+     "top: 50%" base - overriding it once here (via the class, plus the
+     id for the jar) shifts the whole composition's vertical centre down
+     together, out of the title safe area, while their existing "left"
+     and their per-object translate() offsets (unchanged) keep the same
+     spacing relative to each other and to this new centre. The 16px is
+     a small fixed bottom margin, matching the "usable stage height =
+     100dvh - title safe area - bottom safety margin" described target. */
+  #jar-wrapper,
+  .jar-object-wrapper {
+    top: calc(var(--touch-landscape-title-safe-area) + (100vh - var(--touch-landscape-title-safe-area) - 16px) / 2);
+    top: calc(var(--touch-landscape-title-safe-area) + (100dvh - var(--touch-landscape-title-safe-area) - 16px) / 2);
+  }
+
+  /* The title - stays on one line, sized to the short screen. Its
+     "top"/"left" stay exactly as script.js sets them (a plain CSS rule
+     can't move them anyway - see the portrait block above for the same
+     note) - the "title safe area" above is simply sized generously
+     enough for the title to always fit inside it unobstructed. */
+  #opening-text {
+    font-size: clamp(11px, 3vh, 16px);
+    font-size: clamp(11px, 3dvh, 16px);
+    white-space: nowrap;
+    width: max-content;
+  }
+
+  /* Every label fits on one line, sized to the short screen - the
+     general touch rule (above, outside this media query) still
+     supplies its position/colour/etc. */
+  .jar-object-label {
+    white-space: nowrap;
+    width: max-content;
+    max-width: none;
+    line-height: 1;
+    font-size: var(--touch-landscape-label-size);
+  }
+}
+
+/* Phone landscape specifically (distinguished from tablet landscape
+   above by viewport HEIGHT, per the same reasoning as the "vh"-based
+   sizing throughout the block above), matched to an 874x402 reference
+   layout. Only the wrestler changes here; every other touch-landscape
+   rule above already applies equally to phone and tablet. */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 600px) {
+  :root {
+    --wrestler-height: clamp(250px, 93vh, 700px);
+    --wrestler-height: clamp(250px, 93dvh, 700px);
+    --wrestler-horizontal-position: 5vw;
+  }
+
+  /* Same fix as the phone-portrait block above, for the same reason -
+     see its own comment. */
+  .jar-object-label {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* Large landscape touch devices (iPad, and any similarly-sized tablet)
+   ONLY - not phones. This used to be a media query built from "hover:
+   none" / "pointer: coarse" - but iPadOS Safari's default "Request
+   Desktop Website" behaviour answers THOSE SPECIFIC media features as
+   if a mouse were attached ("pointer: fine", "hover: hover"), even on
+   a plain touchscreen iPad with no mouse - so that query could
+   silently never match a real iPad. See the "TABLET / IPAD LANDSCAPE
+   DETECTION" section near the top of script.js: it checks
+   "navigator.maxTouchPoints" instead (a hardware capability, not a CSS
+   media feature, so it isn't affected by that "desktop site" request)
+   together with a width/height range that fits iPad-sized screens but
+   excludes phones, and toggles this ".tablet-landscape" class on
+   <html> accordingly - updated live on resize/rotation.
+
+   Everything below simply redirects the touch-landscape variables back
+   to the SAME values the plain desktop rules above already use (see
+   the ":root" block near the top of this file) - so an iPad in
+   landscape now composes itself exactly like the desktop reference
+   layout: same wrestler size/position, same logo size, same closed/
+   open jar sizes, same four-corner object spread, and the jar/objects
+   recentred on the true middle of the screen instead of the shorter
+   phone-oriented layout's reserved top "title safe area". Nothing here
+   touches any selector this file doesn't already use elsewhere, and
+   nothing here removes touch-only behaviour (the persistent object
+   labels, the tap-based object tooltip positioning, etc. all still
+   come from the general touch rules above) - it only overrides sizing/
+   position, so iPad keeps working like a touch device while looking
+   like the desktop composition. "html.tablet-landscape" (element +
+   class) is also more specific than the general touch-landscape
+   block's plain ":root", so it wins regardless of source order, not
+   just because it happens to come later in this file. */
+/* ROOT CAUSE of the wrestler collapsing to 0x0 on the physical iPad:
+   custom properties don't validate their contents when declared - so
+   "--wrestler-height: 83dvh" always won the cascade over the earlier
+   "83vh" line below (even on a browser that can't actually use "dvh"
+   at all), because the browser has no reason to reject it AT THAT
+   POINT. The failure only happens one step later, when "#wrestler"
+   tries to actually USE that value for its real "height" property -
+   if THIS device's Safari doesn't support the "dvh" unit there, that
+   substitution fails, and "height" does NOT fall back to the earlier
+   "83vh" line (custom-property cascade resolution and property-value
+   substitution are two separate steps - by the time the second one
+   fails, the first one has already discarded "83vh" for good). It
+   falls back to "height"'s own initial value instead: "auto" - and an
+   empty, non-replaced, position:fixed box with height:auto, no
+   content, and only "aspect-ratio" (nothing else) to derive a width
+   from has no definite dimension to resolve either one from, so both
+   collapse to 0. That 0 height is also why "top" measured out to
+   exactly viewport height in the debug panel - a fixed element with
+   "bottom: 0" and "height: 0" necessarily has its top edge sitting
+   exactly at the bottom of the viewport; that's a direct symptom of
+   the same root cause, not a separate positioning bug.
+   The fix: "@supports" checks feature support BEFORE the cascade even
+   considers the rule inside it, so on a browser that can't use "dvh",
+   this whole block is skipped outright and the plain "vh" line below
+   is the only thing that ever wins - no collapse is possible either
+   way. Scoped to ONLY this tablet-landscape block, exactly like
+   before - the general touch-landscape block phones also use (further
+   up this file) is left exactly as it was. */
+html.tablet-landscape {
+  --wrestler-height: 83vh;
+  --wrestler-horizontal-position: 8vw;
+
+  --logo-width: clamp(180px, 15vw, 230px);
+
+  --closed-jar-size: clamp(135px, 17vw, 230px);
+  --open-jar-size: clamp(220px, 32vw, 460px);
+  --nav-object-size: clamp(230px, 19vw, 380px);
+  --object-offset-x: clamp(250px, 25vw, 450px);
+  --object-offset-y: clamp(210px, 24vh, 310px);
+  --bottom-object-offset-y: var(--object-offset-y);
+}
+
+@supports (height: 1dvh) {
+  html.tablet-landscape {
+    --wrestler-height: 83dvh;
+    --object-offset-y: clamp(210px, 24dvh, 310px);
+  }
+}
+
+/* Undoes the general touch-landscape block's "top" override above
+   (which pushes the jar/objects down, out of a reserved title safe
+   area) - back to the desktop composition's own plain "top: 50%"
+   centring, since the desktop-sized logo above is small enough in its
+   fixed corner that no such safe area is needed here. */
+html.tablet-landscape #jar-wrapper,
+html.tablet-landscape .jar-object-wrapper {
+  top: 50%;
+}
+
+/* --------------------------------------------------------------------
+   IPAD LANDSCAPE - JAR + FOUR OBJECTS + LOGO (width/orientation, no JS)
+   A plain, JS-independent alternative to "html.tablet-landscape" above,
+   covering the properties that control the opened jar's size, the four
+   objects' size/spread, and the logo's size, plus the same "top: 50%"
+   centring undo just above. "html.tablet-landscape" depends on
+   script.js having already run its own touch/size detection and added
+   the class at the right moment - a real iPad landscape return trip
+   (about.html's or interventions.html's own title/icon, both linking to
+   "index.html?state=open-jar") kept showing the four objects tiny and
+   stacked inside the jar, and separately the logo shrinking/enlarging/
+   jumping, even after several attempts to make that JS-driven timing
+   more reliable. This rule removes the JS dependency for this part of
+   the layout entirely: any screen at least 900px wide in landscape
+   orientation - real desktop and real iPad alike - gets the exact same
+   values the plain desktop ":root" rules (near the top of this file)
+   already use, decided purely by the browser's own layout at every
+   paint, with nothing to time or re-check. Deliberately NOT keyed off
+   "(hover: hover)"/"(pointer: fine)" - an iPad has no hover, so that
+   pairing would never correctly identify it. Placed after every touch/
+   mobile rule in this file (all of it above this point) so it wins by
+   source order for anything it shares equal specificity with; its
+   values match "html.tablet-landscape"'s own exactly, so wherever that
+   class IS correctly applied too, this is a harmless, redundant
+   agreement, never a conflict. The wrestler is deliberately left alone
+   (still handled by "html.tablet-landscape" above) - it's hidden
+   ("display: none") in the returned-to-menu state this fixes, and
+   touching its own dvh-sensitive sizing here isn't needed for it. */
+@media (min-width: 900px) and (orientation: landscape) {
+  :root {
+    --closed-jar-size: clamp(135px, 17vw, 230px);
+    --open-jar-size: clamp(220px, 32vw, 460px);
+    --nav-object-size: clamp(230px, 19vw, 380px);
+    --object-offset-x: clamp(250px, 25vw, 450px);
+    --object-offset-y: clamp(210px, 24vh, 310px);
+    --bottom-object-offset-y: var(--object-offset-y);
+  }
+
+  #jar-wrapper,
+  .jar-object-wrapper {
+    top: 50%;
+  }
+}
+
+/* --------------------------------------------------------------------
+   IPAD LANDSCAPE - LOGO + FOUR OBJECT LABELS (touch + height, no JS)
+   Unlike the jar/object sizes just above (which happen to already match
+   the plain desktop defaults, so a width/orientation-only rule can't
+   ever disagree with desktop), the logo's tablet-landscape value
+   ("--logo-width" below) is genuinely DIFFERENT from the plain desktop
+   default - so it needs a selector that actually excludes desktop and
+   iPhone, not just one based on width/orientation. "(hover: none) and
+   (pointer: coarse)" is what the general touch-landscape rule (above)
+   already keys off, and real-device testing earlier in this project
+   confirmed it DOES correctly match a real iPad - the JS-driven
+   ".tablet-landscape" class's own problem was never that CSS detection,
+   only ITS timing on a fresh return trip. Adding "min-height: 601px" -
+   this file's own existing phone/tablet landscape boundary (see the
+   phone-landscape sub-query above, which carves phones out at exactly
+   "max-height: 600px") - excludes iPhone landscape the same way that
+   sub-query does, without touching it directly. Together this is a
+   plain CSS rule that only ever matches a real iPad in landscape,
+   giving the logo (and, for the same "font boosting" reason as the
+   iPhone fixes above, the four labels) the exact value
+   "html.tablet-landscape" already intends, with nothing to time. */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (min-height: 601px) {
+  :root {
+    --logo-width: clamp(180px, 15vw, 230px);
+  }
+
+  .jar-object-label {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------
+   IPAD PORTRAIT - FOUR OBJECT LABELS (width/orientation, no JS)
+   Same "font boosting" fix as the iPad landscape block just above, for
+   iPad held in portrait. "min-width: 601px" is this file's own existing
+   phone/tablet boundary (see the phone-portrait sub-query further up,
+   which carves phones out of the broader touch-portrait rules at
+   exactly "max-width: 600px") - scoped this way, rather than adding it
+   to that broader touch-portrait rule directly, so this change can
+   never touch anything iPhone-portrait actually uses. iPad portrait's
+   own jar/object sizing and logo already come from plain CSS (no JS
+   class involved there at all, unlike landscape above), so nothing else
+   needs a JS-independent fallback here. */
+@media (min-width: 601px) and (orientation: portrait) {
+  .jar-object-label {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* ==========================================================================
+   ABOUT OVERLAY
+   Sits on top of everything else on this page - the homepage
+   underneath (jar, four objects, their floating animations) is a
+   completely separate document from whatever this reuses inside the
+   iframe, so nothing here can affect it either way. See index.html for
+   the markup and script.js for openAboutOverlay()/closeAboutOverlay().
+   ========================================================================== */
+#about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* above every other element on this page (the highest existing z-index, #object-tooltip, is 210) */
+  background-color: #FFFFFF;
+}
+
+#about-overlay[hidden] {
+  display: none;
+}
+
+#about-overlay-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ==========================================================================
+   PROCESS.HTML
+   Two lines in the upper-left corner: a link back to the homepage, and
+   this page's plain heading directly underneath it. Both live inside one
+   fixed-position wrapper so they stack naturally, in normal document
+   flow, and stay exactly left-aligned with each other - rather than
+   needing two separately fixed-positioned elements to line up by hand.
+   Everything else in this file is scoped to IDs that don't exist on
+   process.html, so none of it applies here - except the html/body reset
+   at the very top of this file, which gives process.html the same white
+   background and no-scrollbar behaviour as the homepage.
+   ========================================================================== */
+#process-header {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  margin: 0;
+  line-height: 2; /* spacing between the two lines below - both inherit this, neither sets its own */
+}
+
+/* "little things here now" - links back to index.html. Styled to look
+   exactly like the homepage title: no underline, colour change, button
+   background, or border of any kind. */
+#home-link {
+  display: block;
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: normal;
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#home-link:focus {
+  outline: 1px solid #000000;
+  outline-offset: 2px;
+}
+
+/* "yunshu qin's thesis process document" - plain page heading, not clickable */
+#process-title {
+  margin: 0;
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: normal;
+  color: #000000;
+}
+
+/* TEMPORARY - the tablet-portrait-only feather debug status (see
+   index.html/script.js). Hidden by default; shown only inside the
+   existing tablet-portrait media query (the same one "--wrestler-
+   height" etc. above use), then hidden again inside its own narrower
+   phone-portrait sub-query - reusing the project's existing tablet-
+   vs-phone distinction rather than inventing a new one. Remove this
+   whole rule (plus the element in index.html and its wiring in
+   script.js) once the physical iPad test confirms the fix above. */
+#portrait-feather-debug {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  #portrait-feather-debug {
+    display: block;
+    position: fixed;
+    top: 4px;
+    left: 4px;
+    z-index: 999999;
+    margin: 0;
+    max-width: 92vw;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    padding: 4px 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    pointer-events: none;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  #portrait-feather-debug {
+    display: none;
+  }
+}
