@@ -463,9 +463,19 @@ function showClickMessage() {
 // blocked. Playing it here (muted, then immediately stopped and reset)
 // "spends" that unlock right away without anything audible, so the
 // real play() later in startPigeonFlight() is allowed through.
+// "muted" (not just "volume = 0") is what actually keeps this silent -
+// iPhone Safari specifically ignores JavaScript's "volume" on <audio>
+// elements entirely (it's tied to the hardware volume there instead),
+// so the old "volume = 0" alone still played this unlock call at full,
+// audible volume on iPhone only - a real flap sound heard right at the
+// click, before the pigeon itself ever appears. "muted" is a separate
+// property Safari does honour on every device, iPhone included, so
+// this unlock stays genuinely silent everywhere - iPad/desktop, where
+// "volume = 0" already worked, sound exactly the same as before.
 function unlockFlappingSound() {
   const originalVolume = flappingSound.volume;
   flappingSound.volume = 0;
+  flappingSound.muted = true;
 
   const unlockPromise = flappingSound.play();
 
@@ -473,6 +483,7 @@ function unlockFlappingSound() {
     flappingSound.pause();
     flappingSound.currentTime = 0;
     flappingSound.volume = originalVolume;
+    flappingSound.muted = false;
   }
 
   if (unlockPromise !== undefined) {
