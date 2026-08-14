@@ -24,11 +24,16 @@
   <!-- Upper-right logo, same asset/size/position system as the homepage
        and the about page - see #interventions-logo/#interventions-logo-link
        in interventions.css, which reuse style.css's --logo-margin/
-       --logo-width. Clicking it returns to the homepage and restarts
-       the opening sequence, matching the about page's own logo exactly
-       (as opposed to the title/icon below, which returns directly to
-       the already-open jar state instead). -->
-  <a id="interventions-logo-link" href="index.html" aria-label="little things here now - back to homepage">
+       --logo-width. Clicking it restarts the whole site from the
+       pigeon-opening scene (see interventions.js) - not just the plain
+       navigation a link like this would otherwise be, since a stale
+       "return to the open jar" flag (set when this page is reached
+       from the jar's own tape-dispenser icon) would otherwise make the
+       reloaded homepage jump straight back to the navigation state
+       instead of genuinely restarting (as opposed to the title/icon
+       below, which deliberately returns directly to the already-open
+       jar state instead). -->
+  <a id="interventions-logo-link" href="index.html" aria-label="little things here now - restart the site">
     <img id="interventions-logo" src="assets/images/little-things-logo.png" alt="little things here now" draggable="false">
   </a>
 

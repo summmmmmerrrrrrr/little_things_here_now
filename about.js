@@ -94,9 +94,12 @@ aboutTabs.forEach((tab) => {
 // here now" mean two DIFFERENT things, and would otherwise both just
 // navigate this iframe's own nested browsing context to a second,
 // nested copy of the homepage inside the overlay box. A standalone
-// visit to this page (window.self === window.top) never reaches
-// either block below, so both links keep navigating normally,
-// completely unaffected.
+// visit to this page (window.self === window.top, the "else" branch
+// below) needs its own version of the logo fix instead - same goal,
+// simpler since there's no iframe/overlay to account for; the
+// heading/fortune-teller link needs no such fix either way, since its
+// plain "index.html?state=open-jar" href already works correctly on
+// its own in both contexts.
 if (window.self !== window.top) {
   // The heading/fortune-teller link ("back to the jar, already open")
   // just closes the overlay - the homepage underneath was never
@@ -112,15 +115,15 @@ if (window.self !== window.top) {
 
   // The logo means something different: "start over", the same thing
   // it means everywhere else on the site (see handleTitleReload() in
-  // script.js, which does a plain window.location.reload()). So
-  // instead of merely closing the overlay, this clears the
-  // sessionStorage flag that would otherwise make the reloaded
+  // script.js). So instead of merely closing the overlay, this clears
+  // the sessionStorage flag that would otherwise make the reloaded
   // homepage jump straight back to the navigation state (see
   // markReturnToNavigation()/beginHomeSequence() in script.js - same
   // key string, "returnToMainNavigation"), then sends the actual
   // homepage (window.top, not this iframe) to a plain, param-free
-  // URL - a genuine restart via the site's own real reload mechanism,
-  // not an approximation of one.
+  // URL - a genuine restart, the same destination handleTitleReload()
+  // itself now also navigates to directly, rather than an approximation
+  // of one.
   const aboutLogoLink = document.getElementById('about-logo-link');
   if (aboutLogoLink) {
     aboutLogoLink.addEventListener('click', (event) => {
@@ -131,6 +134,32 @@ if (window.self !== window.top) {
         // sessionStorage unavailable - nothing to clear
       }
       window.top.location.href = 'index.html';
+    });
+  }
+} else {
+  // A standalone visit to this page (not inside the homepage's overlay
+  // iframe) - the logo means the same "start over" thing here as it
+  // does everywhere else on the site (see handleTitleReload() in
+  // script.js), which a plain "<a href="index.html">" (this link's own
+  // HTML) doesn't reliably do on its own: a stale "return to the open
+  // jar" flag (set when this page is reached from the jar's own
+  // fortune-teller icon) would otherwise make the loaded homepage jump
+  // straight back to the navigation state instead of genuinely
+  // restarting. Clearing it first, then navigating - same fix as
+  // collected.js's/take.js's/interventions.js's own logo-click
+  // handlers, and this same file's own iframe-embedded case just
+  // above, minus the "window.top"/overlay parts this standalone case
+  // doesn't need - guarantees a genuine restart every time.
+  const aboutLogoLink = document.getElementById('about-logo-link');
+  if (aboutLogoLink) {
+    aboutLogoLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      try {
+        sessionStorage.removeItem('returnToMainNavigation');
+      } catch (error) {
+        // sessionStorage unavailable - nothing to clear
+      }
+      window.location.href = 'index.html';
     });
   }
 }

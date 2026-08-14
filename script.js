@@ -1596,16 +1596,34 @@ document.addEventListener('visibilitychange', () => {
 /* --------------------------------------------------------------------
    TITLE / RESTART CONTROL
    Clicking, tapping, or pressing Enter/Space on "little things here
-   now" reloads the page, which naturally puts everything - the
-   pigeon, feather, paper, audio, timers, and pointer state - back to
-   its original starting condition, without us having to manually
-   reset each one by hand.
+   now" always returns to the very start of the opening pigeon
+   sequence - the same thing every other page's own logo does (see
+   about.js's/collected.js's/interventions.js's/take.js's own logo-
+   click handlers). A plain "window.location.reload()" doesn't
+   reliably do that BY ITSELF: reloading repeats the exact same URL,
+   so if this page was reached at "?state=open-jar" (about.html's/
+   interventions.html's/collected.html's/take.html's own heading links
+   all point there) a reload just lands back on that same open-jar
+   state instead - and the "returnToMainNavigation" sessionStorage flag
+   (see markReturnToNavigation()/beginHomeSequence() further down)
+   could independently cause the same thing even without that query
+   string. Clearing that flag and navigating to a plain, param-free
+   "index.html" - rather than reloading whatever URL happens to be
+   current - is what actually guarantees the true beginning every time,
+   putting everything - the pigeon, feather, paper, audio, timers, and
+   pointer state - back to its original starting condition, without us
+   having to manually reset each one by hand.
    -------------------------------------------------------------------- */
 function handleTitleReload(event) {
   // Don't let this click reach any other page-wide click handler
-  // (such as the "click anywhere to begin" listener) before reloading.
+  // (such as the "click anywhere to begin" listener) before navigating.
   event.stopPropagation();
-  window.location.reload();
+  try {
+    sessionStorage.removeItem(RETURN_TO_NAV_STORAGE_KEY);
+  } catch (error) {
+    // sessionStorage unavailable - nothing to clear
+  }
+  window.location.href = 'index.html';
 }
 
 // A real <button> already fires a "click" event for mouse clicks, touch

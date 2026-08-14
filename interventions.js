@@ -34,6 +34,31 @@ updateTabletLandscapeClass();
 window.addEventListener('resize', updateTabletLandscapeClass);
 window.addEventListener('orientationchange', updateTabletLandscapeClass);
 
+// The logo means "start over", the same thing it means everywhere else
+// on the site (see handleTitleReload() in script.js) - not just a
+// plain navigation back to "index.html". Reaching this page from the
+// jar's own tape-dispenser icon sets a sessionStorage flag (see
+// markReturnToNavigation() in script.js) so that a genuine "back"
+// jumps straight to the finished jar state instead of replaying the
+// opening sequence - but that same flag would just as wrongly make a
+// deliberate restart via this logo jump back to the jar too, instead
+// of actually restarting. Clearing it first (same fix as collected.js's/
+// take.js's own logo-click handler, and about.js's own overlay-scoped
+// one, minus the iframe/overlay parts neither this page needs - it's
+// never opened inside one) guarantees a genuine restart every time.
+const interventionsLogoLink = document.getElementById('interventions-logo-link');
+if (interventionsLogoLink) {
+  interventionsLogoLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    try {
+      sessionStorage.removeItem('returnToMainNavigation');
+    } catch (error) {
+      // sessionStorage unavailable - nothing to clear
+    }
+    window.location.href = 'index.html';
+  });
+}
+
 // ======================================
 // EDITABLE VARIABLES
 // ======================================
